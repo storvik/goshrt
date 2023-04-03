@@ -1,0 +1,10 @@
+[server]
+key = "qTGVn$a&hRJ9385C^z7L!MW5CnwZq3&$"
+port = ":3000"
+
+[database]
+db = "goshrt"
+user = "goshrt"
+password = "trhsog"
+address = "localhost"
+port = "6000"
