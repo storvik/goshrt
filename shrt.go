@@ -17,6 +17,8 @@ type Shrt struct {
 }
 
 type ShrtStorer interface {
+	Open() error
+	Close() error
 	CreateShrt(s *Shrt) error
 	Shrt(d, s string) (*Shrt, error)
 	// TODO: Delete shrt and get list of shrts

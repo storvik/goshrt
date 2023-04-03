@@ -21,6 +21,10 @@ func (a *application) Serve() error {
 	// TODO: Connect to postgresql database
 	auth := token.NewAuth(a.cfg.Server.Key)
 	db := postgres.NewClient(a.cfg.Database.DB, a.cfg.Database.User, a.cfg.Database.Password, a.cfg.Database.Address)
+	err := db.Open()
+	if err != nil {
+		return err
+	}
 
 	s.Auth = auth
 	s.ShrtStore = db
@@ -49,11 +53,15 @@ func (a *application) Serve() error {
 		if err != nil {
 			log.Fatal(err)
 		}
+		err = s.ShrtStore.Close()
+		if err != nil {
+			log.Fatal(err)
+		}
 		serverStopCtx()
 	}()
 
 	// Run the server
-	err := s.ListenAndServe()
+	err = s.ListenAndServe()
 	if err != nil {
 		return err
 	}

@@ -12,24 +12,24 @@ var _ goshrt.ShrtStorer = &client{}
 type client struct {
 	db *sql.DB
 
-	dbName     string
-	dbUser     string
-	dbPassword string
-	dbIP       string
+	name     string
+	user     string
+	password string
+	address  string
 }
 
-func NewClient(n, u, p, i string) goshrt.ShrtStorer {
+func NewClient(n, u, p, a string) goshrt.ShrtStorer {
 	return &client{
-		dbName:     n,
-		dbUser:     u,
-		dbPassword: p,
-		dbIP:       i,
+		name:     n,
+		user:     u,
+		password: p,
+		address:  a,
 	}
 }
 
 // Open connects to database using info stored in client.
 func (c *client) Open() error {
-	connStr := fmt.Sprintf("postgresql://%s:%s@%s/%s?sslmode=disablen", c.dbUser, c.dbPassword, c.dbIP, c.dbName)
+	connStr := fmt.Sprintf("postgresql://%s:%s@%s/%s?sslmode=disable", c.user, c.password, c.address, c.name)
 	var err error
 	c.db, err = sql.Open("postgres", connStr)
 	if err != nil {
@@ -63,7 +63,7 @@ func (c *client) Shrt(d, s string) (*goshrt.Shrt, error) {
 		Domain: d,
 		Slug:   s,
 	}
-	err := c.db.QueryRow("SELECT dest, expiry FROM ? WHERE domain=? AND slug", c.dbName, d, s).Scan(&shrt.Dest, &shrt.Expiry)
+	err := c.db.QueryRow("SELECT dest, expiry FROM ? WHERE domain=? AND slug", c.name, d, s).Scan(&shrt.Dest, &shrt.Expiry)
 	if err == sql.ErrNoRows {
 		// TODO: Add better error handling her, maybe custom domain type error
 		return nil, err
@@ -82,7 +82,7 @@ func (c *client) CreateShrt(s *goshrt.Shrt) error {
 	}
 	defer stmt.Close()
 
-	if _, err := stmt.Exec(c.dbName, s.Domain, s.Slug, s.Dest, s.Expiry); err != nil {
+	if _, err := stmt.Exec(c.name, s.Domain, s.Slug, s.Dest, s.Expiry); err != nil {
 		return err
 	}
 	return nil
