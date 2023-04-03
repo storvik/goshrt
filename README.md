@@ -9,6 +9,21 @@ The goal is to support multiple domains, cache and a simple API for creating new
 - Postgresql
 - API first
 
+## Development
+
+### Postgres
+
+When doing local development postgres has to be running.
+While there are several ways to achieve this, VM / docker / podman, I myself use Nix.
+Spinning up a development database is simple in Nix develop shell:
+
+``` shell
+  $ nix develop
+  $ pgnix-init     # initiate database and start it
+  $ pgnix-status   # check if database is running
+  $ pgnix-stop     # stop postgresql database
+```
+
 ## Todo
 - [ ] Add rest api for adding and deleting shrts
 - [ ] Client, goshrtc
