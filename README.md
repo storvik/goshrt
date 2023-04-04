@@ -1,5 +1,8 @@
 # goshrt - Go URL shortener
 
+[![build](https://github.com/storvik/goshrt/actions/workflows/build.yml/badge.svg)](https://github.com/storvik/goshrt/actions/workflows/build.yml)
+[![go test](https://github.com/storvik/goshrt/actions/workflows/gotest.yml/badge.svg)](https://github.com/storvik/goshrt/actions/workflows/gotest.yml)
+
 > Work in progress!
 
 This is my attempt at creating a self hosted URL shortener written in Go.
