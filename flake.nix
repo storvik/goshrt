@@ -5,11 +5,6 @@
 
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
 
-    nixos-generators = {
-      url = "github:nix-community/nixos-generators";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
     nix2container.url = "github:nlewo/nix2container";
 
     gitignore = {
@@ -19,7 +14,7 @@
 
   };
 
-  outputs = inputs@{ self, nixpkgs, gitignore, nix2container, nixos-generators }:
+  outputs = inputs@{ self, nixpkgs, gitignore, nix2container }:
     let
       pkgs = import nixpkgs { system = "x86_64-linux"; };
       nix2containerPkgs = nix2container.packages.x86_64-linux;
@@ -35,27 +30,6 @@
       #   };
       # };
 
-      packages."x86_64-linux".goshrt-dev-container = nixos-generators.nixosGenerate {
-        system = "x86_64-linux";
-        modules = [
-          ({ config, pkgs, ... }: {
-            services.postgresql = {
-              enable = true;
-              ensureDatabases = [ "goshrt" ];
-              ensureUsers = [
-                {
-                  name = "goshrt";
-                  ensurePermissions = {
-                    "DATABASE goshrt" = "ALL PRIVILEGES";
-                  };
-                }
-              ];
-            };
-          })
-        ];
-        format = "vm-nogui";
-      };
-
       devShell."x86_64-linux" =
         let
           tmp = ".devshell";
@@ -68,10 +42,6 @@
         pkgs.mkShell {
           PGDATA = pgdata;
           buildInputs = [
-            (pkgs.writeScriptBin "goshrt-dev-container" ''
-              QEMU_NET_OPTS=\"hostfwd=tcp::5432-:5432\"
-              ${packages.x86_64-linux.goshrt-dev-container}/bin/run-nixos-vm
-            '')
             (pkgs.writeScriptBin "pgnix-init" ''
               initdb -D ${pgdata} -U postgres
               pg_ctl -D ${pgdata} -l ${pgdata}/postgres.log  -o "-p ${port} -k /tmp -i" start
