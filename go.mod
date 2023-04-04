@@ -13,6 +13,7 @@ require (
 require (
 	github.com/cpuguy83/go-md2man/v2 v2.0.1 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
+	github.com/lib/pq v1.10.7 // indirect
 	github.com/russross/blackfriday/v2 v2.1.0 // indirect
 	golang.org/x/sys v0.0.0-20211025201205-69cdffdb9359 // indirect
 )

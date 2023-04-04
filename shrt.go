@@ -17,6 +17,7 @@ type Shrt struct {
 }
 
 type ShrtStorer interface {
+	Migrate() error
 	Open() error
 	Close() error
 	CreateShrt(s *Shrt) error

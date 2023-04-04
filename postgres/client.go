@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 
+	_ "github.com/lib/pq"
 	"github.com/storvik/goshrt"
 )
 
@@ -55,35 +56,4 @@ func (c *client) Migrate() error {
  );`
 	_, err := c.db.Exec(m)
 	return err
-}
-
-// Shrt tries to find url in database
-func (c *client) Shrt(d, s string) (*goshrt.Shrt, error) {
-	shrt := &goshrt.Shrt{
-		Domain: d,
-		Slug:   s,
-	}
-	err := c.db.QueryRow("SELECT dest, expiry FROM ? WHERE domain=? AND slug", c.name, d, s).Scan(&shrt.Dest, &shrt.Expiry)
-	if err == sql.ErrNoRows {
-		// TODO: Add better error handling her, maybe custom domain type error
-		return nil, err
-	}
-	if err != nil {
-		return nil, err
-	}
-	return shrt, nil
-}
-
-// CreateShrt creates new shrt in database
-func (c *client) CreateShrt(s *goshrt.Shrt) error {
-	stmt, err := c.db.Prepare("INSERT INTO ? (domain, slug, dets, expiry) VALUES( ?, ?, ?, ? )")
-	if err != nil {
-		return err
-	}
-	defer stmt.Close()
-
-	if _, err := stmt.Exec(c.name, s.Domain, s.Slug, s.Dest, s.Expiry); err != nil {
-		return err
-	}
-	return nil
 }
