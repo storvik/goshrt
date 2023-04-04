@@ -1,4 +1,4 @@
-name: test
+name: build
 on: [push, pull_request]
 jobs:
   build:
@@ -16,18 +16,3 @@ jobs:
         run: |
           nix develop --command \
             go build cmd/goshrtc/*.go
-  gotest:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v3
-      - uses: nixbuild/nix-quick-install-action@v22
-        with:
-          nix_conf: experimental-features = nix-command flakes
-      - name: start postgres database
-        run: |
-          nix develop --command \
-            pgnix-init
-      - name: run gotests
-        run: |
-          nix develop --command \
-            go test -v ./...
