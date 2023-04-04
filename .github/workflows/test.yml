@@ -1,14 +1,29 @@
 name: test
 on: [push, pull_request]
 jobs:
-  test:
+  build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - uses: nixbuild/nix-quick-install-action@v22
         with:
           nix_conf: experimental-features = nix-command flakes
-      - name: start database
+      - name: build goshrt server
+        run: |
+          nix develop --command \
+            go build cmd/goshrt/*.go
+      - name: build goshrtc client
+        run: |
+          nix develop --command \
+            go build cmd/goshrtc/*.go
+  gotest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: nixbuild/nix-quick-install-action@v22
+        with:
+          nix_conf: experimental-features = nix-command flakes
+      - name: start postgres database
         run: |
           nix develop --command \
             pgnix-init
