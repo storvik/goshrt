@@ -97,6 +97,10 @@
             (pkgs.writeScriptBin "pgnix-stop" ''
               pg_ctl -D ${pgdata} stop
             '')
+            (pkgs.writeScriptBin "pgnix-purge" ''
+              pg_ctl -D ${pgdata} stop
+              rm -rf .devshell/db
+            '')
             pkgs.glibcLocales
             pkgs.postgresql
             pkgs.pgcli
