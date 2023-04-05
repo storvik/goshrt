@@ -10,6 +10,7 @@ import (
 	"github.com/adrg/xdg"
 	"github.com/pelletier/go-toml"
 	"github.com/storvik/goshrt/token"
+	"github.com/storvik/goshrt/version"
 	"github.com/urfave/cli/v2"
 )
 
@@ -62,12 +63,12 @@ func main() {
 			appcfg := new(AppConfig)
 			cfg := c.String("config")
 			if cfg == "" {
-				cfg, err = xdg.SearchConfigFile("goshrt/config.toml")
+				cfg, err = xdg.SearchConfigFile("goshrt/server.toml")
 				if err != nil {
 					return err
 				}
 			}
-			a.infoLog.Printf("Using config file: %s\n", cfg)
+			// a.infoLog.Printf("Using config file: %s\n", cfg)
 			if buf, err := ioutil.ReadFile(cfg); err != nil {
 				return err
 			} else if err := toml.Unmarshal(buf, appcfg); err != nil {
@@ -77,6 +78,15 @@ func main() {
 			return nil
 		},
 		Commands: []*cli.Command{
+			{
+				Name:    "version",
+				Aliases: []string{"v"},
+				Usage:   "print version",
+				Action: func(c *cli.Context) error {
+					version.Print()
+					return nil
+				},
+			},
 			{
 				Name:    "token",
 				Aliases: []string{"t"},
