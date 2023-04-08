@@ -48,12 +48,12 @@ func (c *client) Close() error {
 func (c *client) Migrate() error {
 	m := `
  CREATE TABLE IF NOT EXISTS shrts(
+   id serial primary key,
    domain text,     -- NOT NULL due to PK below
    slug text,       -- NOT NULL due to PK below
    dest text,
-   expiry date,
-   PRIMARY KEY (domain, slug)
- );`
+   expiry date
+);`
 	_, err := c.db.Exec(m)
 	return err
 }

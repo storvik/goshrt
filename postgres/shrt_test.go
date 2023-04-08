@@ -2,6 +2,7 @@ package postgres_test
 
 import (
 	"testing"
+	"time"
 
 	"github.com/storvik/goshrt"
 )
@@ -18,12 +19,37 @@ func TestShrtStorerPostgres_CreateShrt(t *testing.T) {
 			Dest:   "http://github.com/storvik/goshrt",
 		}
 
-		if err := db.CreateShrt(s); err != nil {
+		if _, err := db.CreateShrt(s); err != nil {
 			t.Fatal(err)
 		}
 	})
 
-	t.Run("ErrNameRequired", func(t *testing.T) {
+	t.Run("ErrMultiple", func(t *testing.T) {
+		db := MustOpenDB(t)
+		defer MustCloseDB(t, db)
+
+		s := &goshrt.Shrt{
+			Domain: "gotest.com",
+			Slug:   "TestMultiple",
+			Dest:   "http://github.com/storvik/goshrt",
+			Expiry: time.Now().Add(24 * time.Hour),
+		}
+
+		if _, err := db.CreateShrt(s); err != nil {
+			t.Fatal(err)
+		}
+
+		_, err := db.CreateShrt(s)
+		if err == nil {
+			t.Fatal("expected error, but received none")
+		}
+		if err != goshrt.ErrMultiple {
+			t.Error("expected multiple error, received another error")
+		}
+
+	})
+
+	t.Run("ErrInvalid", func(t *testing.T) {
 		db := MustOpenDB(t)
 		defer MustCloseDB(t, db)
 
@@ -46,8 +72,12 @@ func TestShrtStorerPostgres_CreateShrt(t *testing.T) {
 		}
 
 		for _, tt := range tests {
-			if err := db.CreateShrt(tt); err == nil {
+			_, err := db.CreateShrt(tt)
+			if err == nil {
 				t.Fatal("expected error, but received none")
+			}
+			if err != goshrt.ErrInvalid {
+				t.Error("expected invalid input error, received another error")
 			}
 		}
 
@@ -66,11 +96,41 @@ func TestShrtStorerPostgres_Shrt(t *testing.T) {
 			Dest:   "http://github.com/storvik/goshrt",
 		}
 
-		if err := db.CreateShrt(s1); err != nil {
+		if _, err := db.CreateShrt(s1); err != nil {
 			t.Fatal(err)
 		}
 
 		s2, err := db.Shrt(s1.Domain, s1.Slug)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if s1.Domain != s2.Domain || s1.Slug != s2.Slug || s1.Dest != s2.Dest {
+			t.Error("input not equal to output")
+		}
+
+	})
+
+}
+
+func TestShrtStorerPostgres_ShrtByID(t *testing.T) {
+
+	t.Run("OK", func(t *testing.T) {
+		db := MustOpenDB(t)
+		defer MustCloseDB(t, db)
+
+		s1 := &goshrt.Shrt{
+			Domain: "gotest.com",
+			Slug:   "TestShrtStorerPostgres_ShrtByID",
+			Dest:   "http://github.com/storvik/goshrt",
+		}
+
+		id, err := db.CreateShrt(s1)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		s2, err := db.ShrtByID(id)
 		if err != nil {
 			t.Fatal(err)
 		}
