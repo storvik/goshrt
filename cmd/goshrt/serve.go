@@ -18,7 +18,6 @@ func (a *application) Serve() error {
 	s := http.NewServer(a.errorLog, a.cfg.Server.Port)
 
 	// Setup server and attach interfaces
-	// TODO: Connect to postgresql database
 	auth := token.NewAuth(a.cfg.Server.Key)
 	db := postgres.NewClient(a.cfg.Database.DB, a.cfg.Database.User, a.cfg.Database.Password, a.cfg.Database.Address)
 	err := db.Open()

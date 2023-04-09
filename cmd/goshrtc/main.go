@@ -7,6 +7,7 @@ import (
 
 	"github.com/adrg/xdg"
 	"github.com/pelletier/go-toml"
+	"github.com/storvik/goshrt"
 	"github.com/storvik/goshrt/version"
 	"github.com/urfave/cli/v2"
 )
@@ -22,7 +23,15 @@ type AppConfig struct {
 }
 
 func main() {
-	// var a *AppConfig
+	shrtFlags := []cli.Flag{
+		&cli.IntFlag{Name: "id"},
+		&cli.StringFlag{Name: "domain"},
+		&cli.StringFlag{Name: "slug"},
+		&cli.StringFlag{Name: "dest"},
+		&cli.StringFlag{Name: "expiry"},
+	}
+
+	var a *AppConfig
 	app := &cli.App{
 		Name:        "goshrtc",
 		Usage:       "Goshrt client",
@@ -49,7 +58,8 @@ func main() {
 			} else if err := toml.Unmarshal(buf, appcfg); err != nil {
 				return err
 			}
-			// a = appcfg
+			// TODO: Should check config file better, ex validate server address
+			a = appcfg
 			return nil
 		},
 		Commands: []*cli.Command{
@@ -68,11 +78,43 @@ func main() {
 				Usage:   "handle shrts through the server api",
 				Subcommands: []*cli.Command{
 					{
-						Name:  "add",
-						Usage: "[client name] generate new valid jwt token to be used by clients",
+						Name:     "add",
+						Category: "shrt",
+						Usage:    "add shrt, needs domain and destination and optional slug",
+						Flags:    shrtFlags,
 						Action: func(c *cli.Context) error {
-							fmt.Println("Not implemented yet")
-							return nil
+							shrt := &goshrt.Shrt{
+								ID:     c.Int("id"),
+								Domain: c.String("domain"),
+								Slug:   c.String("slug"),
+								Dest:   c.String("dest"),
+								// TODO: Add expiry here, must parse timestamp
+							}
+							if shrt.Domain == "" || shrt.Dest == "" {
+								return goshrt.ErrInvalid
+							}
+							return a.shrtAdd(shrt)
+						},
+					},
+					{
+						Name:     "get",
+						Category: "shrt",
+						Usage:    "get shrt details, needs either id or domain and slug ",
+						Flags:    shrtFlags,
+						Action: func(c *cli.Context) error {
+							shrt := &goshrt.Shrt{
+								ID:     c.Int("id"),
+								Domain: c.String("domain"),
+								Slug:   c.String("slug"),
+								Dest:   c.String("dest"),
+								// TODO: Add expiry here, must parse timestamp
+							}
+							if shrt.ID == 0 {
+								if shrt.Domain == "" || shrt.Slug == "" {
+									return goshrt.ErrInvalid
+								}
+							}
+							return a.shrtGet(shrt)
 						},
 					},
 				},

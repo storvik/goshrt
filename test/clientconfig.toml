@@ -2,4 +2,4 @@
 key = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnb3NocnQtc2VydmVyIiwic3ViIjoidGVzdCIsImlhdCI6MTY4MDY3ODY5NSwianRpIjoiZ29zaHJ0LWp3dCJ9.PRSHh41_Fiv64Ar6S6sqp2XieP6IEYygUjZ8XHUG8vQ"
 
 [server]
-address = "localhost:3000"
+address = "http://localhost:3000"
