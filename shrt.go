@@ -10,6 +10,7 @@ const (
 )
 
 type Shrt struct {
+	ID     int       `json:"id"`          // ID
 	Domain string    `json:"domain"`      // Domain
 	Slug   string    `json:"slug"`        // Everything avfter domain
 	Dest   string    `json:"destination"` // Destination URL
@@ -20,7 +21,7 @@ type ShrtStorer interface {
 	Migrate() error
 	Open() error
 	Close() error
-	CreateShrt(s *Shrt) (int, error)
+	CreateShrt(s *Shrt) error
 	Shrt(d, s string) (*Shrt, error)
 	ShrtByID(id int) (*Shrt, error)
 	// TODO: Delete shrt and get list of shrts

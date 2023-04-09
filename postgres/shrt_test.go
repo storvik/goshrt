@@ -19,7 +19,7 @@ func TestShrtStorerPostgres_CreateShrt(t *testing.T) {
 			Dest:   "http://github.com/storvik/goshrt",
 		}
 
-		if _, err := db.CreateShrt(s); err != nil {
+		if err := db.CreateShrt(s); err != nil {
 			t.Fatal(err)
 		}
 	})
@@ -35,11 +35,11 @@ func TestShrtStorerPostgres_CreateShrt(t *testing.T) {
 			Expiry: time.Now().Add(24 * time.Hour),
 		}
 
-		if _, err := db.CreateShrt(s); err != nil {
+		if err := db.CreateShrt(s); err != nil {
 			t.Fatal(err)
 		}
 
-		_, err := db.CreateShrt(s)
+		err := db.CreateShrt(s)
 		if err == nil {
 			t.Fatal("expected error, but received none")
 		}
@@ -72,7 +72,7 @@ func TestShrtStorerPostgres_CreateShrt(t *testing.T) {
 		}
 
 		for _, tt := range tests {
-			_, err := db.CreateShrt(tt)
+			err := db.CreateShrt(tt)
 			if err == nil {
 				t.Fatal("expected error, but received none")
 			}
@@ -96,7 +96,7 @@ func TestShrtStorerPostgres_Shrt(t *testing.T) {
 			Dest:   "http://github.com/storvik/goshrt",
 		}
 
-		if _, err := db.CreateShrt(s1); err != nil {
+		if err := db.CreateShrt(s1); err != nil {
 			t.Fatal(err)
 		}
 
@@ -125,12 +125,12 @@ func TestShrtStorerPostgres_ShrtByID(t *testing.T) {
 			Dest:   "http://github.com/storvik/goshrt",
 		}
 
-		id, err := db.CreateShrt(s1)
+		err := db.CreateShrt(s1)
 		if err != nil {
 			t.Fatal(err)
 		}
 
-		s2, err := db.ShrtByID(id)
+		s2, err := db.ShrtByID(s1.ID)
 		if err != nil {
 			t.Fatal(err)
 		}

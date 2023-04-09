@@ -41,29 +41,30 @@ func (c *client) ShrtByID(id int) (*goshrt.Shrt, error) {
 
 // CreateShrt creates new shrt in database and returns its id. Has to look for
 // same domain and slug which isn't expired.
-func (c *client) CreateShrt(s *goshrt.Shrt) (int, error) {
+func (c *client) CreateShrt(s *goshrt.Shrt) error {
 	if s.Dest == "" || s.Domain == "" || s.Slug == "" {
-		return 0, goshrt.ErrInvalid
+		return goshrt.ErrInvalid
 	}
 	var e time.Time
 	err := c.db.QueryRow("SELECT expiry FROM shrts WHERE domain=$1 AND slug=$2", s.Domain, s.Slug).Scan(&e)
 	if err != sql.ErrNoRows {
 		// TODO: This does not check for multiple expired rows
 		if time.Now().Before(e) {
-			return 0, goshrt.ErrMultiple
+			return goshrt.ErrMultiple
 		}
 	}
 
 	stmt, err := c.db.Prepare("INSERT INTO shrts(domain, slug, dest, expiry) VALUES( $1, $2, $3, $4 ) RETURNING id")
 	if err != nil {
-		return 0, err
+		return err
 	}
 	defer stmt.Close()
 
 	var id int
 	err = stmt.QueryRow(s.Domain, s.Slug, s.Dest, s.Expiry).Scan(&id)
 	if err != nil {
-		return 0, err
+		return err
 	}
-	return id, nil
+	s.ID = id
+	return nil
 }
