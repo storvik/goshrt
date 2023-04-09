@@ -2,7 +2,6 @@ package main
 
 import (
 	"context"
-	"log"
 	"os"
 	"os/signal"
 	"syscall"
@@ -15,6 +14,7 @@ import (
 
 // Serve serves api in graceful manner
 func (a *application) Serve() error {
+	a.infoLog.Println("Starting goshrt server - self hosted url shortener")
 	s := http.NewServer(a.errorLog, a.cfg.Server.Port)
 
 	// Setup server and attach interfaces
@@ -43,23 +43,24 @@ func (a *application) Serve() error {
 		go func() {
 			<-shutdownCtx.Done()
 			if shutdownCtx.Err() == context.DeadlineExceeded {
-				log.Fatal("graceful shutdown timed out.. forcing exit.")
+				a.errorLog.Fatal("graceful shutdown timed out.. forcing exit.")
 			}
 		}()
 
 		// Trigger graceful shutdown
 		err := s.Shutdown(shutdownCtx)
 		if err != nil {
-			log.Fatal(err)
+			a.errorLog.Fatal(err)
 		}
 		err = s.ShrtStore.Close()
 		if err != nil {
-			log.Fatal(err)
+			a.errorLog.Fatal(err)
 		}
 		serverStopCtx()
 	}()
 
 	// Run the server
+	a.infoLog.Printf("Server started, running on port %s", a.cfg.Server.Port)
 	err = s.ListenAndServe()
 	if err != nil {
 		return err
