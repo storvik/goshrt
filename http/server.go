@@ -143,7 +143,7 @@ func (s *Server) shrtGetHandler() http.HandlerFunc {
 			domain := chi.URLParam(r, "id_domain")
 			shrt, err = s.ShrtStore.Shrt(domain, slug)
 		} else {
-			id := chi.URLParam(r, "id")
+			id := chi.URLParam(r, "id_domain")
 			idInt, _ := strconv.Atoi(id)
 			shrt, err = s.ShrtStore.ShrtByID(idInt)
 		}
