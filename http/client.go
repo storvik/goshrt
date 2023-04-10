@@ -42,9 +42,8 @@ func (c *Client) ShrtAdd(s *goshrt.Shrt) error {
 	// 	return err
 	// }
 
-	shrt := new(goshrt.Shrt)
 	decoder := json.NewDecoder(res.Body)
-	err = decoder.Decode(&shrt)
+	err = decoder.Decode(&s)
 	if err != nil {
 		return errors.New("error decoding response from endpoint")
 	}

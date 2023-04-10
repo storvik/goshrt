@@ -49,9 +49,9 @@ func (c *client) Migrate() error {
 	m := `
  CREATE TABLE IF NOT EXISTS shrts(
    id serial primary key,
-   domain text,     -- NOT NULL due to PK below
-   slug text,       -- NOT NULL due to PK below
-   dest text,
+   domain text not null,
+   slug text not null,
+   dest text not null,
    expiry date
 );`
 	_, err := c.db.Exec(m)

@@ -47,15 +47,25 @@ func (c *client) CreateShrt(s *goshrt.Shrt) error {
 	if s.Dest == "" || s.Domain == "" || s.Slug == "" {
 		return goshrt.ErrInvalid
 	}
-	var e time.Time
-	err := c.db.QueryRow("SELECT expiry FROM shrts WHERE domain=$1 AND slug=$2", s.Domain, s.Slug).Scan(&e)
-	if err != sql.ErrNoRows {
-		// TODO: This does not check for multiple expired rows
-		if time.Now().Before(e) {
+	rows, err := c.db.Query("SELECT expiry FROM shrts WHERE domain=$1 AND slug=$2", s.Domain, s.Slug)
+	if err != nil {
+		return err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		var e time.Time
+		err = rows.Scan(&e)
+		if err != nil {
+			return err
+		}
+		if time.Now().Before(e) || e.IsZero() {
 			return goshrt.ErrMultiple
 		}
 	}
-
+	expiry := sql.NullTime{
+		Time:  s.Expiry,
+		Valid: !s.Expiry.IsZero(),
+	}
 	stmt, err := c.db.Prepare("INSERT INTO shrts(domain, slug, dest, expiry) VALUES( $1, $2, $3, $4 ) RETURNING id")
 	if err != nil {
 		return err
@@ -63,7 +73,7 @@ func (c *client) CreateShrt(s *goshrt.Shrt) error {
 	defer stmt.Close()
 
 	var id int
-	err = stmt.QueryRow(s.Domain, s.Slug, s.Dest, s.Expiry).Scan(&id)
+	err = stmt.QueryRow(s.Domain, s.Slug, s.Dest, expiry).Scan(&id)
 	if err != nil {
 		return err
 	}
