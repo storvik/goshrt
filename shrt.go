@@ -20,11 +20,17 @@ type Shrt struct {
 
 // Printp pretty prints Shrt struct
 func (s *Shrt) Printp() {
+	var timestring string
+	if s.Expiry.IsZero() {
+		timestring = "not set"
+	} else {
+		timestring = s.Expiry.Format("2006.02.01")
+	}
 	fmt.Printf("ID\t\t%d\n", s.ID)
 	fmt.Printf("Domain\t\t%s\n", s.Domain)
 	fmt.Printf("Slug\t\t%s\n", s.Slug)
 	fmt.Printf("Destination\t%s\n", s.Dest)
-	fmt.Printf("Expiry\t\t%s\n", s.Expiry.Format("2006.02.01"))
+	fmt.Printf("Expiry\t\t%s\n", timestring)
 }
 
 type ShrtStorer interface {
