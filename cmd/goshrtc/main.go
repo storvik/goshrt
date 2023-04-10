@@ -8,6 +8,7 @@ import (
 	"github.com/adrg/xdg"
 	"github.com/pelletier/go-toml"
 	"github.com/storvik/goshrt"
+	"github.com/storvik/goshrt/http"
 	"github.com/storvik/goshrt/version"
 	"github.com/urfave/cli/v2"
 )
@@ -93,7 +94,17 @@ func main() {
 							if shrt.Domain == "" || shrt.Dest == "" {
 								return goshrt.ErrInvalid
 							}
-							return a.shrtAdd(shrt)
+							client := &http.Client{
+								Address: a.Server.Address,
+								Key:     a.Client.Key,
+							}
+							err := client.ShrtAdd(shrt)
+							if err != nil {
+								return err
+							}
+							fmt.Printf("Shrt successfully added!\n\n")
+							shrt.Printp()
+							return nil
 						},
 					},
 					{
@@ -114,7 +125,16 @@ func main() {
 									return goshrt.ErrInvalid
 								}
 							}
-							return a.shrtGet(shrt)
+							client := &http.Client{
+								Address: a.Server.Address,
+								Key:     a.Client.Key,
+							}
+							err := client.ShrtGet(shrt)
+							if err != nil {
+								return err
+							}
+							shrt.Printp()
+							return nil
 						},
 					},
 				},

@@ -1,6 +1,7 @@
 package goshrt
 
 import (
+	"fmt"
 	"strings"
 	"time"
 )
@@ -15,6 +16,15 @@ type Shrt struct {
 	Slug   string    `json:"slug"`        // Everything avfter domain
 	Dest   string    `json:"destination"` // Destination URL
 	Expiry time.Time `json:"expire"`      // Timestamp for expire
+}
+
+// Printp pretty prints Shrt struct
+func (s *Shrt) Printp() {
+	fmt.Printf("ID\t\t%d\n", s.ID)
+	fmt.Printf("Domain\t\t%s\n", s.Domain)
+	fmt.Printf("Slug\t\t%s\n", s.Slug)
+	fmt.Printf("Destination\t%s\n", s.Dest)
+	fmt.Printf("Expiry\t\t%s\n", s.Expiry.Format("2006.02.01"))
 }
 
 type ShrtStorer interface {

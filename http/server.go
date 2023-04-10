@@ -6,6 +6,7 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"strconv"
 	"time"
 
 	"github.com/go-chi/chi/v5"
@@ -52,10 +53,15 @@ func NewServer(l *log.Logger, p string) *Server {
 	r.Route("/api", func(r chi.Router) {
 		// Should authenticate here r.Use()
 		r.Route("/shrt", func(r chi.Router) {
-			r.Post("/", s.shrtCreateHandler()) // POST          /shrt         - Create new shrt
-			r.Route("/{slug}", func(r chi.Router) {
-				r.Get("/", s.shrtGetHandler())       // GET     /shrt/{slug}  - Get shrt details
-				r.Delete("/", s.shrtDeleteHandler()) // DELETE  /shrt/{slug}  - Delete shrt
+			r.Post("/", s.shrtCreateHandler()) // POST              /shrt
+			r.Route("/{id_domain}", func(r chi.Router) {
+				r.Get("/", s.shrtGetHandler())       // GET         /shrt/{id}
+				r.Delete("/", s.shrtDeleteHandler()) // DELETE      /shrt/{id}
+				r.Route("/{slug}", func(r chi.Router) {
+					r.Get("/", s.shrtGetHandler())       // GET     /shrt/{domain}/{slug}
+					r.Delete("/", s.shrtDeleteHandler()) // DELETE  /shrt/{domain}/{slug}
+				})
+
 			})
 		})
 	})
@@ -128,22 +134,28 @@ func (s *Server) shrtCreateHandler() http.HandlerFunc {
 
 func (s *Server) shrtGetHandler() http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		var err error
 		shrt := new(goshrt.Shrt)
-		decoder := json.NewDecoder(r.Body)
-		err := decoder.Decode(&shrt)
-		if err != nil {
-			s.ErrorLog.Printf("Could not decode json: %s\n", err)
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
+
+		// If slug is set, domain shold be present
+		// Else ID should be firsts
+		if slug := chi.URLParam(r, "slug"); slug != "" {
+			domain := chi.URLParam(r, "id_domain")
+			shrt, err = s.ShrtStore.Shrt(domain, slug)
+		} else {
+			id := chi.URLParam(r, "id")
+			idInt, _ := strconv.Atoi(id)
+			shrt, err = s.ShrtStore.ShrtByID(idInt)
 		}
 
-		if shrt.ID > 0 {
-			// Use ID if ID is set
-			shrt, err = s.ShrtStore.ShrtByID(shrt.ID)
-		} else {
-			shrt, err = s.ShrtStore.Shrt(shrt.Domain, shrt.Slug)
-		}
-		if err != nil {
+		if err == goshrt.ErrNotFound {
+			response, _ := json.Marshal(map[string]string{"response": "error retrieving"})
+			w.Header().Set("Content-Type", "application/json; charset=utf-8")
+			w.WriteHeader(http.StatusNotFound)
+			w.Write(response)
+			s.ErrorLog.Printf("Could not get shrt from database: %s\n", err)
+			return
+		} else if err != nil {
 			response, _ := json.Marshal(map[string]string{"response": "error retrieving"})
 			w.Header().Set("Content-Type", "application/json; charset=utf-8")
 			w.WriteHeader(http.StatusInternalServerError)
