@@ -16,12 +16,16 @@ func (c *client) Shrt(d, s string) (*goshrt.Shrt, error) {
 		Domain: d,
 		Slug:   s,
 	}
-	err := c.db.QueryRow("SELECT id, dest, expiry FROM shrts WHERE domain=$1 AND slug=$2", d, s).Scan(&shrt.ID, &shrt.Dest, &shrt.Expiry)
+	t := sql.NullTime{}
+	err := c.db.QueryRow("SELECT id, dest, expiry FROM shrts WHERE domain=$1 AND slug=$2", d, s).Scan(&shrt.ID, &shrt.Dest, &t)
 	if err == sql.ErrNoRows {
 		return nil, goshrt.ErrNotFound
 	}
 	if err != nil {
 		return nil, err
+	}
+	if t.Valid {
+		shrt.Expiry = t.Time
 	}
 	return shrt, nil
 }
@@ -31,12 +35,16 @@ func (c *client) ShrtByID(id int) (*goshrt.Shrt, error) {
 	shrt := &goshrt.Shrt{
 		ID: id,
 	}
-	err := c.db.QueryRow("SELECT domain, slug, dest, expiry FROM shrts WHERE id=$1", id).Scan(&shrt.Domain, &shrt.Slug, &shrt.Dest, &shrt.Expiry)
+	t := sql.NullTime{}
+	err := c.db.QueryRow("SELECT domain, slug, dest, expiry FROM shrts WHERE id=$1", id).Scan(&shrt.Domain, &shrt.Slug, &shrt.Dest, &t)
 	if err == sql.ErrNoRows {
 		return nil, goshrt.ErrNotFound
 	}
 	if err != nil {
 		return nil, err
+	}
+	if t.Valid {
+		shrt.Expiry = t.Time
 	}
 	return shrt, nil
 }
