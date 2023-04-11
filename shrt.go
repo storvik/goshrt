@@ -2,6 +2,7 @@ package goshrt
 
 import (
 	"fmt"
+	"net/url"
 	"strings"
 	"time"
 )
@@ -31,6 +32,20 @@ func (s *Shrt) Printp() {
 	fmt.Printf("Slug\t\t%s\n", s.Slug)
 	fmt.Printf("Destination\t%s\n", s.Dest)
 	fmt.Printf("Expiry\t\t%s\n", timestring)
+}
+
+func (s *Shrt) ValidDest() bool {
+	_, err := url.ParseRequestURI(s.Dest)
+	if err != nil {
+		return false
+	}
+
+	u, err := url.Parse(s.Dest)
+	if err != nil || u.Scheme == "" || u.Host == "" {
+		return false
+	}
+
+	return true
 }
 
 type ShrtStorer interface {
