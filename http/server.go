@@ -13,6 +13,8 @@ import (
 	"github.com/storvik/goshrt"
 )
 
+// TODO: Add tests using httptest
+
 // Server type, must be global in order to addach interfaces used
 // in http routes.
 type Server struct {
@@ -52,6 +54,7 @@ func NewServer(l *log.Logger, p string) *Server {
 	// API routes
 	r.Route("/api", func(r chi.Router) {
 		// Should authenticate here r.Use()
+		r.Use(s.requestLogger)
 		r.Route("/shrt", func(r chi.Router) {
 			r.Post("/", s.shrtCreateHandler()) // POST              /shrt
 			r.Route("/{id_domain}", func(r chi.Router) {
@@ -95,6 +98,7 @@ func indexHandler() http.HandlerFunc {
 // TODO: Better looking error site
 func (s *Server) shrtHandler() http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		t := time.Now()
 		slug := chi.URLParam(r, "slug")
 		if slug == "" {
 			s.ErrorLog.Println("Could not get empty slug")
@@ -116,7 +120,7 @@ func (s *Server) shrtHandler() http.HandlerFunc {
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
-		s.InfoLog.Printf("Redirecting %s/%s to %s\n", shrt.Domain, shrt.Slug, shrt.Dest)
+		s.InfoLog.Printf("%s %s used %s  --> %s\n", r.Method, r.URL, time.Since(t), shrt.Dest)
 		http.Redirect(w, r, shrt.Dest, http.StatusMovedPermanently)
 	})
 }
