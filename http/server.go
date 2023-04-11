@@ -92,9 +92,32 @@ func indexHandler() http.HandlerFunc {
 	})
 }
 
+// TODO: Better looking error site
 func (s *Server) shrtHandler() http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		// This handler should lookup slug in db and redirect
+		slug := chi.URLParam(r, "slug")
+		if slug == "" {
+			s.ErrorLog.Println("Could not get empty slug")
+			w.Header().Set("Content-Type", "text/html")
+			w.WriteHeader(http.StatusNotFound)
+			return
+		}
+
+		// Parse URL to get domain
+		shrt, err := s.ShrtStore.Shrt(r.Host, slug)
+		if err == goshrt.ErrNotFound {
+			s.InfoLog.Println("Could not find, " + r.Host + "/" + slug)
+			w.Header().Set("Content-Type", "text/html")
+			w.WriteHeader(http.StatusNotFound)
+			return
+		} else if err != nil {
+			s.ErrorLog.Println("Could not get shrt, " + err.Error())
+			w.Header().Set("Content-Type", "text/html")
+			w.WriteHeader(http.StatusInternalServerError)
+			return
+		}
+		s.InfoLog.Printf("Redirecting %s/%s to %s\n", shrt.Domain, shrt.Slug, shrt.Dest)
+		http.Redirect(w, r, shrt.Dest, http.StatusMovedPermanently)
 	})
 }
 
@@ -114,6 +137,8 @@ func (s *Server) shrtCreateHandler() http.HandlerFunc {
 			// TODO: Make slug length configurable
 			shrt.Slug = goshrt.GenerateSlug(7)
 		}
+
+		// TODO: Validate destination
 
 		err = s.ShrtStore.CreateShrt(shrt)
 		if err != nil {

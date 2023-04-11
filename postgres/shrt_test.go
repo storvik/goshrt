@@ -14,9 +14,9 @@ func TestShrtStorerPostgres_CreateShrt(t *testing.T) {
 		defer MustCloseDB(t, db)
 
 		s := &goshrt.Shrt{
-			Domain: "gotest.com",
-			Slug:   "123456",
-			Dest:   "http://github.com/storvik/goshrt",
+			Domain: "localhost:3000",
+			Slug:   "test",
+			Dest:   "https://github.com/storvik/goshrt",
 		}
 
 		if err := db.CreateShrt(s); err != nil {
@@ -28,6 +28,7 @@ func TestShrtStorerPostgres_CreateShrt(t *testing.T) {
 		db := MustOpenDB(t)
 		defer MustCloseDB(t, db)
 
+		// TODO: Add better tests that tests various timestamps
 		s := &goshrt.Shrt{
 			Domain: "gotest.com",
 			Slug:   "TestMultiple",

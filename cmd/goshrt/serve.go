@@ -25,8 +25,11 @@ func (a *application) Serve() error {
 		return err
 	}
 
+	// Attach interfaces
 	s.Auth = auth
 	s.ShrtStore = db
+
+	s.InfoLog = a.infoLog
 
 	// Server run context
 	serverCtx, serverStopCtx := context.WithCancel(context.Background())
