@@ -28,11 +28,14 @@ Spinning up a development database is simple in Nix develop shell:
 ```
 
 ## Todo
-- [ ] Add rest api for adding and deleting shrts
-- [ ] Client, goshrtc
+- [x] Add rest api for adding and getting shrts
+- [x] Client, goshrtc
+- [ ] Authentication
+- [ ] Add delete shrt should use id
+- [ ] Add getting list of shrts
 - [ ] Add support for multiple domains
-- [ ] Add support for random generated slugs
-- [ ] Add support for user specified slugs
+- [x] Add support for random generated slugs
+- [x] Add support for user specified slugs
 - [ ] Redis cache in front of postgresql
 - [ ] Metrics on visited urls
 - [ ] Add instructions for
