@@ -31,6 +31,13 @@ func (a *application) Serve() error {
 
 	s.InfoLog = a.infoLog
 
+	// Run database migrations
+	s.InfoLog.Println("Running database migrations")
+	err = db.Migrate()
+	if err != nil {
+		return err
+	}
+
 	// Server run context
 	serverCtx, serverStopCtx := context.WithCancel(context.Background())
 

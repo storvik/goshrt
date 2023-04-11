@@ -20,6 +20,7 @@ When doing local development/testing postgres has to be running.
 While there are several ways to achieve this, VM / docker / podman, I myself use Nix.
 Spinning up a development database is very simple in Nix shell.
 After installing Nix, devshell is entered through the command `nix develop`.
+The following helpers for dealing with postgres is avilable:
 
 ``` shell
 $ pgnix-init     # initiate database and start it
@@ -42,7 +43,7 @@ $ pgnix-purge && pgnix-init && go clean -testcache && go test -v ./...
 ```
 
 > `go clean -testcache` ensures that all tests are run.
-> Without it tests will be cached and for instance database migragions will not be run.
+> Without it tests will be cached and for instance database migrations will not be run.
 
 ## Todo
 - [x] Add rest api for adding and getting shrts
