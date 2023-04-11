@@ -24,7 +24,7 @@ func (c *Client) ShrtAdd(s *goshrt.Shrt) error {
 		return errors.New("could not create new request")
 	}
 	req.Header.Set("Content-Type", "application/json")
-	// req.Header.Set("Authorization", "Bearer secret")
+	req.Header.Set("Authorization", c.Key)
 
 	client := http.Client{Timeout: 5 * time.Second}
 	res, err := client.Do(req)
@@ -64,7 +64,7 @@ func (c *Client) ShrtGet(s *goshrt.Shrt) error {
 		return errors.New("could not create new request")
 	}
 	req.Header.Set("Content-Type", "application/json")
-	// req.Header.Set("Authorization", "Bearer secret")
+	req.Header.Set("Authorization", c.Key)
 
 	client := http.Client{Timeout: 5 * time.Second}
 	res, err := client.Do(req)

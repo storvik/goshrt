@@ -53,7 +53,7 @@ func NewServer(l *log.Logger, p string) *Server {
 
 	// API routes
 	r.Route("/api", func(r chi.Router) {
-		// Should authenticate here r.Use()
+		r.Use(s.authorize)
 		r.Use(s.requestLogger)
 		r.Route("/shrt", func(r chi.Router) {
 			r.Post("/", s.shrtCreateHandler()) // POST              /shrt

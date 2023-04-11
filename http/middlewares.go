@@ -3,7 +3,6 @@ package http
 import (
 	"encoding/json"
 	"net/http"
-	"strings"
 	"time"
 )
 
@@ -17,8 +16,7 @@ func (s *Server) requestLogger(next http.Handler) http.Handler {
 
 func (s *Server) authorize(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		toknStr := strings.Split(r.Header.Get("Authorization"), " ")[1]
-		valid, err := s.Auth.Validate(toknStr)
+		valid, err := s.Auth.Validate(r.Header.Get("Authorization"))
 		if err != nil || !valid {
 			if err != nil {
 				s.ErrorLog.Printf("Could not validate token, %s\n", err.Error())
