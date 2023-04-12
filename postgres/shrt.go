@@ -111,3 +111,59 @@ func (c *client) DeleteByID(id int) (*goshrt.Shrt, error) {
 	}
 	return shrt, nil
 }
+
+// Shrts retrenves all shorts in database. Note that this is not efficient
+// at all, should seriously add pagination to this.
+func (c *client) Shrts() ([]*goshrt.Shrt, error) {
+	var shrts []*goshrt.Shrt
+	rows, err := c.db.Query("SELECT id, domain, slug, dest, expiry FROM shrts")
+	if err == sql.ErrNoRows {
+		return nil, goshrt.ErrNotFound
+	}
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		s := &goshrt.Shrt{}
+		t := sql.NullTime{}
+		err = rows.Scan(&s.ID, &s.Domain, &s.Slug, &s.Dest, &t)
+		if err != nil {
+			return nil, err
+		}
+		if t.Valid {
+			s.Expiry = t.Time
+		}
+		shrts = append(shrts, s)
+	}
+
+	return shrts, nil
+}
+
+// ShrtsByDomain retrieves all shrts by domain. Note that this is not efficient
+// at all, should seriously add pagination to this.
+func (c *client) ShrtsByDomain(d string) ([]*goshrt.Shrt, error) {
+	var shrts []*goshrt.Shrt
+	rows, err := c.db.Query("SELECT id, domain, slug, dest, expiry FROM shrts WHERE domain=$1", d)
+	if err == sql.ErrNoRows {
+		return nil, goshrt.ErrNotFound
+	}
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	for rows.Next() {
+		s := &goshrt.Shrt{}
+		t := sql.NullTime{}
+		err = rows.Scan(&s.ID, &s.Domain, &s.Slug, &s.Dest, &t)
+		if err != nil {
+			return nil, err
+		}
+		if t.Valid {
+			s.Expiry = t.Time
+		}
+		shrts = append(shrts, s)
+	}
+
+	return shrts, nil
+}

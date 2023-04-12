@@ -179,3 +179,63 @@ func TestShrtStorerPostgres_DeleteByID(t *testing.T) {
 	})
 
 }
+
+func TestShrtStorerPostgres_Shrts(t *testing.T) {
+
+	t.Run("OK", func(t *testing.T) {
+		db := MustOpenDB(t)
+		defer MustCloseDB(t, db)
+
+		_, err := db.Shrts()
+		if err != nil {
+			t.Fatal(err)
+		}
+		// TODO: Find a better test case here
+	})
+}
+
+func TestShrtStorerPostgres_ShrtsByDomain(t *testing.T) {
+
+	t.Run("OK", func(t *testing.T) {
+		db := MustOpenDB(t)
+		defer MustCloseDB(t, db)
+
+		var tests = []*goshrt.Shrt{
+			{
+				Domain: "shrtsbydomain.com",
+				Slug:   "1",
+				Dest:   "http://github.com/storvik/goshrt",
+			},
+			{
+				Domain: "shrtsbydomain.com",
+				Slug:   "2",
+				Dest:   "http://github.com/storvik/goshrt",
+			},
+			{
+				Domain: "shrtsbydomain.com",
+				Slug:   "3",
+				Dest:   "http://github.com/storvik/goshrt",
+			},
+			{
+				Domain: "shrtsbydomain.com",
+				Slug:   "4",
+				Dest:   "http://github.com/storvik/goshrt",
+			},
+		}
+
+		for _, tt := range tests {
+			err := db.CreateShrt(tt)
+			if err != nil {
+				t.Fatal(err)
+			}
+		}
+
+		shrts, err := db.ShrtsByDomain("shrtsbydomain.com")
+		if err != nil {
+			t.Fatal(err)
+		}
+		if len(shrts) != len(tests) {
+			t.Errorf("expected %d items with given domain, got %d", len(tests), len(shrts))
+		}
+	})
+}

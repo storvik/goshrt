@@ -56,7 +56,9 @@ type ShrtStorer interface {
 	Shrt(d, s string) (*Shrt, error)
 	ShrtByID(id int) (*Shrt, error)
 	DeleteByID(id int) (*Shrt, error)
-	// TODO: Get list of shrts
+	Shrts() ([]*Shrt, error)
+	ShrtsByDomain(d string) ([]*Shrt, error)
+	// TODO: Same as above with pagination
 }
 
 // GenerateSlug generates slug with length l
