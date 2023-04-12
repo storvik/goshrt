@@ -142,7 +142,14 @@ func (s *Server) shrtCreateHandler() http.HandlerFunc {
 			shrt.Slug = goshrt.GenerateSlug(7)
 		}
 
-		// TODO: Validate destination
+		if !shrt.ValidDest() {
+			response, _ := json.Marshal(map[string]string{"response": "error storing shrt"})
+			w.Header().Set("Content-Type", "application/json; charset=utf-8")
+			w.WriteHeader(http.StatusBadRequest)
+			w.Write(response)
+			s.ErrorLog.Printf("Invalid request, destination address is not valid\n")
+			return
+		}
 
 		err = s.ShrtStore.CreateShrt(shrt)
 		if err != nil {
