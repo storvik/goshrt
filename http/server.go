@@ -61,8 +61,7 @@ func NewServer(l *log.Logger, p string) *Server {
 				r.Get("/", s.shrtGetHandler())       // GET         /shrt/{id}
 				r.Delete("/", s.shrtDeleteHandler()) // DELETE      /shrt/{id}
 				r.Route("/{slug}", func(r chi.Router) {
-					r.Get("/", s.shrtGetHandler())       // GET     /shrt/{domain}/{slug}
-					r.Delete("/", s.shrtDeleteHandler()) // DELETE  /shrt/{domain}/{slug}
+					r.Get("/", s.shrtGetHandler()) // GET           /shrt/{domain}/{slug}
 				})
 
 			})
@@ -209,6 +208,29 @@ func (s *Server) shrtGetHandler() http.HandlerFunc {
 
 func (s *Server) shrtDeleteHandler() http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		id := chi.URLParam(r, "id_domain")
+		idInt, _ := strconv.Atoi(id)
+		shrt, err := s.ShrtStore.DeleteByID(idInt)
+		if err == goshrt.ErrNotFound {
+			response, _ := json.Marshal(map[string]string{"response": "could not find item with given id"})
+			w.Header().Set("Content-Type", "application/json; charset=utf-8")
+			w.WriteHeader(http.StatusNotFound)
+			w.Write(response)
+			s.ErrorLog.Printf("Could not find and delete shrt with id %d, %s\n", idInt, err)
+			return
+		} else if err != nil {
+			response, _ := json.Marshal(map[string]string{"response": "error retrieving"})
+			w.Header().Set("Content-Type", "application/json; charset=utf-8")
+			w.WriteHeader(http.StatusInternalServerError)
+			w.Write(response)
+			s.ErrorLog.Printf("Could not get shrt from database: %s\n", err)
+			return
+		}
+
+		response, _ := json.Marshal(shrt)
+		w.Header().Set("Content-Type", "application/json; charset=utf-8")
+		w.WriteHeader(http.StatusOK)
+		w.Write(response)
 	})
 }
 

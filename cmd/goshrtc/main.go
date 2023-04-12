@@ -137,6 +137,31 @@ func main() {
 							return nil
 						},
 					},
+					{
+						Name:     "delete",
+						Category: "shrt",
+						Usage:    "deletes shrt by id",
+						Flags:    []cli.Flag{&cli.IntFlag{Name: "id"}},
+						Action: func(c *cli.Context) error {
+							shrt := &goshrt.Shrt{
+								ID: c.Int("id"),
+							}
+							if shrt.ID == 0 {
+								return goshrt.ErrInvalid
+							}
+							client := &http.Client{
+								Address: a.Server.Address,
+								Key:     a.Client.Key,
+							}
+							err := client.ShrtDelete(shrt)
+							if err != nil {
+								return err
+							}
+							fmt.Printf("Shrt successfully deleted!\n\n")
+							shrt.Printp()
+							return nil
+						},
+					},
 				},
 			},
 		},

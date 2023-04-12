@@ -52,7 +52,7 @@ $ pgnix-purge && pgnix-init && go clean -testcache && go test -v ./...
 - [x] Add support for random generated slugs
 - [x] Add support for user specified slugs
 - [x] Authentication
-- [ ] Add delete shrt should use id
+- [x] Add delete shrt should use id
 - [ ] Add getting list of shrts
 - [ ] Redis cache in front of postgresql
 - [ ] Metrics on visited urls
