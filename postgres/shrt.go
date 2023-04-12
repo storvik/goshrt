@@ -88,3 +88,26 @@ func (c *client) CreateShrt(s *goshrt.Shrt) error {
 	s.ID = id
 	return nil
 }
+
+// DeleteByID deletes shrt by id
+func (c *client) DeleteByID(id int) (*goshrt.Shrt, error) {
+	shrt := &goshrt.Shrt{
+		ID: id,
+	}
+	t := sql.NullTime{}
+	err := c.db.QueryRow("SELECT domain, slug, dest, expiry FROM shrts WHERE id=$1", id).Scan(&shrt.Domain, &shrt.Slug, &shrt.Dest, &t)
+	if err == sql.ErrNoRows {
+		return nil, goshrt.ErrNotFound
+	}
+	if err != nil {
+		return nil, err
+	}
+	if t.Valid {
+		shrt.Expiry = t.Time
+	}
+	_, err = c.db.Exec("DELETE FROM shrts WHERE id=$1", id)
+	if err != nil {
+		return nil, err
+	}
+	return shrt, nil
+}

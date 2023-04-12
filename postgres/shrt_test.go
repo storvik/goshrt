@@ -136,8 +136,44 @@ func TestShrtStorerPostgres_ShrtByID(t *testing.T) {
 			t.Fatal(err)
 		}
 
+		// TODO: Should probably test timestamp too
 		if s1.Domain != s2.Domain || s1.Slug != s2.Slug || s1.Dest != s2.Dest {
 			t.Error("input not equal to output")
+		}
+
+	})
+
+}
+
+func TestShrtStorerPostgres_DeleteByID(t *testing.T) {
+
+	t.Run("OK", func(t *testing.T) {
+		db := MustOpenDB(t)
+		defer MustCloseDB(t, db)
+
+		s1 := &goshrt.Shrt{
+			Domain: "gotest.com",
+			Slug:   "TestShrtStorerPostgres_DeleteByID",
+			Dest:   "http://github.com/storvik/goshrt",
+		}
+
+		err := db.CreateShrt(s1)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		s2, err := db.DeleteByID(s1.ID)
+		if err != nil {
+			t.Fatal(err)
+		}
+
+		if s1.Domain != s2.Domain || s1.Slug != s2.Slug || s1.Dest != s2.Dest {
+			t.Error("input not equal to deleted shrt")
+		}
+
+		_, err = db.ShrtByID(s1.ID)
+		if err != goshrt.ErrNotFound {
+			t.Error("expected to not find deleted shrt, but found it")
 		}
 
 	})

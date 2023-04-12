@@ -55,7 +55,8 @@ type ShrtStorer interface {
 	CreateShrt(s *Shrt) error
 	Shrt(d, s string) (*Shrt, error)
 	ShrtByID(id int) (*Shrt, error)
-	// TODO: Delete shrt and get list of shrts
+	DeleteByID(id int) (*Shrt, error)
+	// TODO: Get list of shrts
 }
 
 // GenerateSlug generates slug with length l
