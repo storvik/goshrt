@@ -145,9 +145,6 @@ func (c *client) Shrts() ([]*goshrt.Shrt, error) {
 func (c *client) ShrtsByDomain(d string) ([]*goshrt.Shrt, error) {
 	var shrts []*goshrt.Shrt
 	rows, err := c.db.Query("SELECT id, domain, slug, dest, expiry FROM shrts WHERE domain=$1", d)
-	if err == sql.ErrNoRows {
-		return nil, goshrt.ErrNotFound
-	}
 	if err != nil {
 		return nil, err
 	}
@@ -163,6 +160,9 @@ func (c *client) ShrtsByDomain(d string) ([]*goshrt.Shrt, error) {
 			s.Expiry = t.Time
 		}
 		shrts = append(shrts, s)
+	}
+	if len(shrts) < 1 {
+		return nil, goshrt.ErrNotFound
 	}
 
 	return shrts, nil
