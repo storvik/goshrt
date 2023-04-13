@@ -1,4 +1,4 @@
-# goshrt - Go URL shortener
+# goshrt - Self hosted URL shortener
 
 [![build](https://github.com/storvik/goshrt/actions/workflows/build.yml/badge.svg)](https://github.com/storvik/goshrt/actions/workflows/build.yml)
 [![go test](https://github.com/storvik/goshrt/actions/workflows/gotest.yml/badge.svg)](https://github.com/storvik/goshrt/actions/workflows/gotest.yml)
@@ -6,11 +6,7 @@
 > Work in progress!
 
 This is my attempt at creating a self hosted URL shortener written in Go.
-The goal is to support multiple domains, cache and a simple API for creating new entries.
-
-## Keywords
-- Postgresql
-- API first
+The goal is to support multiple domains, cache, a simple API for creating new entries and a command line client.
 
 ## Development
 
@@ -53,7 +49,7 @@ $ pgnix-purge && pgnix-init && go clean -testcache && go test -v ./...
 - [x] Add support for user specified slugs
 - [x] Authentication
 - [x] Add delete shrt should use id
-- [ ] Add getting list of shrts
+- [x] Add getting list of shrts
 - [ ] Redis cache in front of postgresql
 - [ ] Metrics on visited urls
 - [ ] Add instructions for

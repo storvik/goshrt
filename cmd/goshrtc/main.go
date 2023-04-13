@@ -13,6 +13,8 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
+// TODO: Better error descriptions in client
+
 // AppConfig represents application configuration
 type AppConfig struct {
 	Client struct {
@@ -162,6 +164,24 @@ func main() {
 							return nil
 						},
 					},
+					{
+						Name:     "list",
+						Category: "shrt",
+						Usage:    "list all shrts or for given domain if domain is set",
+						Flags:    []cli.Flag{&cli.StringFlag{Name: "domain"}},
+						Action: func(c *cli.Context) error {
+							client := &http.Client{
+								Address: a.Server.Address,
+								Key:     a.Client.Key,
+							}
+							shrts, err := client.ShrtGetList(c.String("domain"))
+							if err != nil {
+								return err
+							}
+							printList(shrts)
+							return nil
+						},
+					},
 				},
 			},
 		},
@@ -174,4 +194,14 @@ func main() {
 		os.Exit(1)
 	}
 
+}
+
+func printList(shrts []*goshrt.Shrt) {
+	for _, i := range shrts {
+		t := i.Expiry.Format("2006.01.02")
+		if i.Expiry.IsZero() {
+			t = "          "
+		}
+		fmt.Printf("%3d\t%s\t%-25s\t%-40s\t%s\n", i.ID, t, i.Domain, i.Slug, i.Dest)
+	}
 }

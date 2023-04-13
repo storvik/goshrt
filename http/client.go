@@ -125,3 +125,43 @@ func (c *Client) ShrtDelete(s *goshrt.Shrt) error {
 
 	return nil
 }
+
+func (c *Client) ShrtGetList(d string) ([]*goshrt.Shrt, error) {
+	var slug string
+	if d == "" {
+		slug = fmt.Sprintf("/api/shrts")
+	} else {
+		slug = fmt.Sprintf("/api/shrts/%s", d)
+	}
+	req, err := http.NewRequest(http.MethodGet, c.Address+slug, nil)
+	if err != nil {
+		return nil, errors.New("could not create new request")
+	}
+	req.Header.Set("Content-Type", "application/json")
+	req.Header.Set("Authorization", c.Key)
+
+	client := http.Client{Timeout: 5 * time.Second}
+	res, err := client.Do(req)
+	if err != nil {
+		return nil, errors.New("could not send request, " + err.Error())
+	}
+	defer res.Body.Close()
+
+	// Read response
+	if res.StatusCode != http.StatusOK {
+		return nil, errors.New("received invalid statuscode from endpoint, " + strconv.Itoa(res.StatusCode))
+	}
+	// body, err := ioutil.ReadAll(res.Body)
+	// if err != nil {
+	// 	return err
+	// }
+
+	var shrts []*goshrt.Shrt
+	decoder := json.NewDecoder(res.Body)
+	err = decoder.Decode(&shrts)
+	if err != nil {
+		return nil, errors.New("error decoding response from endpoint, " + err.Error())
+	}
+
+	return shrts, nil
+}
