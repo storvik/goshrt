@@ -1,0 +1,33 @@
+schema = 3
+
+[mod]
+  [mod."github.com/adrg/xdg"]
+    version = "v0.4.0"
+    hash = "sha256-zGjkdUQmrVqD6rMO9oDY+TeJCpuqnHyvkPCaXDlac/U="
+  [mod."github.com/cpuguy83/go-md2man/v2"]
+    version = "v2.0.1"
+    hash = "sha256-R+8iYit0mZjCxiGlp2C3Y5tGhySSNFU1v6wqsWKGBPM="
+  [mod."github.com/davecgh/go-spew"]
+    version = "v1.1.1"
+    hash = "sha256-nhzSUrE1fCkN0+RL04N4h8jWmRFPPPWbCuDc7Ss0akI="
+  [mod."github.com/go-chi/chi/v5"]
+    version = "v5.0.8"
+    hash = "sha256-BMr7IqnWSVYnRuEtsDmd0WD0v5sG15QUyaUaWTemG7A="
+  [mod."github.com/golang-jwt/jwt/v4"]
+    version = "v4.4.1"
+    hash = "sha256-aq8G0baDZks5LXCVbufU1J/r0AMgD2TcZez326G2PEA="
+  [mod."github.com/lib/pq"]
+    version = "v1.10.7"
+    hash = "sha256-YPUv1VBZNFVUjFxQKdYd0Djje6KYYE99Hz6FnTfrmMw="
+  [mod."github.com/pelletier/go-toml"]
+    version = "v1.9.5"
+    hash = "sha256-RJ9K1BTId0Mled7S66iGgxHkZ5JKEIsrrNaEfM8aImc="
+  [mod."github.com/russross/blackfriday/v2"]
+    version = "v2.1.0"
+    hash = "sha256-R+84l1si8az5yDqd5CYcFrTyNZ1eSYlpXKq6nFt4OTQ="
+  [mod."github.com/urfave/cli/v2"]
+    version = "v2.4.0"
+    hash = "sha256-TMdUb94NPbDF5g59qLAsvi/bJTnC0e6kRfA0O+yg5Og="
+  [mod."golang.org/x/sys"]
+    version = "v0.0.0-20211025201205-69cdffdb9359"
+    hash = "sha256-GE8ysfcBR4XoK0X9vmu6PVEQmnTCe5+GY9zUAF223L8="
