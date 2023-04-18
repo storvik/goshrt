@@ -8,6 +8,131 @@
 This is my attempt at creating a self hosted URL shortener written in Go.
 The goal is to support multiple domains, cache, a simple API for creating new entries and a command line client.
 
+<!-- markdown-toc start - Don't edit this section. Run M-x markdown-toc-refresh-toc -->
+**Table of Contents**
+
+- [goshrt - Self hosted URL shortener](#goshrt---self-hosted-url-shortener)
+    - [Install](#install)
+        - [Nix](#nix)
+            - [Overlay](#overlay)
+            - [Module](#module)
+    - [Development](#development)
+        - [Postgres](#postgres)
+        - [Unit testing](#unit-testing)
+
+<!-- markdown-toc end -->
+
+
+## Install
+
+Goshrt can easily be deployed to NixOS server using module available in the flake.nix.
+Should provide instructions for traditional server and Docker.
+
+### Nix
+
+There are several ways to install goshrt with Nix.
+Two recommended approaches is using an overlay, which will work on both NixOS and Nix with another OS, or the included NixOS module.
+
+#### Overlay
+
+The overlay can be added to another flake like this:
+
+``` nix
+{
+  inputs = {
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    goshrt = {
+      url = "path:/home/storvik/developer/golang/goshrt";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+  };
+
+  outputs = inputs@{ self, nixpkgs, goshrt}:
+    let
+      pkgs = import nixpkgs {
+        system = "x86_64-linux";
+        overlays = [ goshrt.overlays.default ];
+      };
+    in {
+
+      # goshrt should now be available in pkgs
+      devShell."x86_64-linux" = pkgs.mkShell {
+        buildInputs = [
+          pkgs.goshrt
+          pkgs.goshrtc
+        ];
+      };
+
+    };
+}
+```
+
+#### Module
+
+This is how the provided NixOS module can be used in another flake:
+
+1. Add goshrt as input in flake.nix
+2. Import goshrt service module
+3. Configure service, see `module.nix` for options
+
+``` nix
+{
+  inputs = {
+    nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
+    goshrt = {
+      url = "path:/home/storvik/developer/golang/goshrt";
+      inputs.nixpkgs.follows = "nixpkgs";
+    };
+  };
+
+  outputs = inputs@{ self, nixpkgs, goshrt }:
+    let
+      pkgs = import nixpkgs { system = "x86_64-linux"; };
+    in {
+
+      nixosConfigurations.mycomputer = pkgs.lib.nixosSystem {
+        system = "x86_64-linux";
+        modules = [
+          goshrt.nixosModules.goshrt
+          ({ pkgs, ... }: {
+            networking.firewall.allowedTCPPorts = [ 8080 ];
+
+            services.postgresql = {
+              enable = true;
+              ensureDatabases = [ "goshrt" ];
+              ensureUsers = [
+                {
+                  name = "goshrt";
+                  ensurePermissions = {
+                    "DATABASE goshrt" = "ALL PRIVILEGES";
+                  };
+                }
+              ];
+            };
+
+            services.goshrt = {
+              enable = true;
+              httpPort = 8080;
+              key = "qTGVn$a&hRJ9385C^z7L!MW5CnwZq3&$";
+            };
+
+          })
+        ];
+      };
+    };
+}
+```
+
+Password for postgres user goshrt must be set manually.
+This can be achieved with:
+
+``` shell
+$ sudo -u postgres psql goshrt
+> ALTER USER goshrt WITH PASSWORD 'trhsog';
+```
+
+> This does not setup forwarding. Typically a nginx reverse proxy, or similar, should be used to forward requests to goshrt.
+
 ## Development
 
 ### Postgres
@@ -40,19 +165,3 @@ $ pgnix-purge && pgnix-init && go clean -testcache && go test -v ./...
 
 > `go clean -testcache` ensures that all tests are run.
 > Without it tests will be cached and for instance database migrations will not be run.
-
-## Todo
-- [x] Add rest api for adding and getting shrts
-- [x] Client, goshrtc
-- [x] Add support for multiple domains
-- [x] Add support for random generated slugs
-- [x] Add support for user specified slugs
-- [x] Authentication
-- [x] Add delete shrt should use id
-- [x] Add getting list of shrts
-- [ ] Redis cache in front of postgresql
-- [ ] Metrics on visited urls
-- [ ] Add instructions for
-  - [ ] Setup
-  - [ ] Nginx proxy
-- [ ] Add package to flake.nix
