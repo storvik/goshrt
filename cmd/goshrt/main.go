@@ -18,8 +18,9 @@ import (
 // AppConfig represents application configuration
 type AppConfig struct {
 	Server struct {
-		Key  string `toml:"key"`  // Key is the serever key used to create tokens and validate API calls
-		Port string `toml:"port"` // Port is the server port where the API should be served
+		Key        string `toml:"key"`         // Key is the serever key used to create tokens and validate API calls
+		Port       string `toml:"port"`        // Port is the server port where the API should be served
+		SlugLength int    `toml:"slug_length"` // SlugLength is the default slug length when generating slugs
 	} `toml:"server"`
 	Database struct {
 		DB       string `toml:"db"`       // database name

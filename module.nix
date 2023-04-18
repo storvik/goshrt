@@ -16,6 +16,7 @@ let
     [server]
     key = "${cfg.key}"
     port = ":${(toString cfg.httpPort)}"
+    slug_length = ${(toString cfg.slugLength)}
 
     [database]
     db = "${cfg.database.name}"
@@ -41,6 +42,11 @@ in
       type = types.str;
       # TODO: Implement keyFile as an alternative
       description = "Secret master key, will be visible in nix store.";
+    };
+    slugLength = mkOption {
+      default = 8;
+      type = types.int;
+      description = lib.mdDoc "Slug length for generating random slugs.";
     };
     database = {
       host = mkOption {

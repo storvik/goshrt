@@ -30,6 +30,7 @@ func (a *application) Serve() error {
 	s.ShrtStore = db
 
 	s.InfoLog = a.infoLog
+	s.SlugLength = uint64(a.cfg.Server.SlugLength)
 
 	// Run database migrations
 	s.InfoLog.Println("Running database migrations")

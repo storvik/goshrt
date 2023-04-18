@@ -18,17 +18,19 @@ import (
 // Server type, must be global in order to addach interfaces used
 // in http routes.
 type Server struct {
-	ln       net.Listener
-	server   *http.Server
-	router   *chi.Mux
-	InfoLog  *log.Logger
-	ErrorLog *log.Logger
+	ln         net.Listener
+	server     *http.Server
+	router     *chi.Mux
+	InfoLog    *log.Logger
+	ErrorLog   *log.Logger
+	SlugLength uint64
 
 	// Interfaces required in various http routes etc
 	Auth      goshrt.Authorizer
 	ShrtStore goshrt.ShrtStorer
 }
 
+// NewServer creates new http server with given errorlogger and port.
 func NewServer(l *log.Logger, p string) *Server {
 	// Create router
 	r := chi.NewRouter()
@@ -142,8 +144,7 @@ func (s *Server) shrtCreateHandler() http.HandlerFunc {
 
 		// If slug is empty, generate random slug
 		if shrt.Slug == "" {
-			// TODO: Make slug length configurable
-			shrt.Slug = goshrt.GenerateSlug(7)
+			shrt.Slug = goshrt.GenerateSlug(s.SlugLength)
 		}
 		// TODO: Shuld check if slug starts with /api and return error
 		if !shrt.ValidDest() {
