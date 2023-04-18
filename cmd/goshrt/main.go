@@ -9,6 +9,7 @@ import (
 
 	"github.com/adrg/xdg"
 	"github.com/pelletier/go-toml"
+	"github.com/storvik/goshrt/postgres"
 	"github.com/storvik/goshrt/token"
 	"github.com/storvik/goshrt/version"
 	"github.com/urfave/cli/v2"
@@ -138,6 +139,30 @@ func main() {
 								}
 							} else {
 								return errors.New("invalid number of arguments")
+							}
+							return nil
+						},
+					},
+				},
+			},
+
+			{
+				Name:  "database",
+				Usage: "database operations",
+				Subcommands: []*cli.Command{
+					{
+						Name:  "migrate",
+						Usage: "migrate database, no other instance of goshrt must be running",
+						Action: func(c *cli.Context) error {
+							db := postgres.NewClient(a.cfg.Database.DB, a.cfg.Database.User, a.cfg.Database.Password, a.cfg.Database.Address)
+							if err := db.Open(); err != nil {
+								return err
+							}
+							if err := db.Migrate(); err != nil {
+								return err
+							}
+							if err := db.Close(); err != nil {
+								return err
 							}
 							return nil
 						},
