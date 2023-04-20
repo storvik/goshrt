@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"time"
 
 	"github.com/adrg/xdg"
 	"github.com/pelletier/go-toml"
@@ -86,12 +87,20 @@ func main() {
 						Usage:    "add shrt, needs domain and destination and optional slug",
 						Flags:    shrtFlags,
 						Action: func(c *cli.Context) error {
+							var t time.Time
+							var err error
+							if c.String("expiry") != "" {
+								t, err = time.Parse(c.String("expiry"), "2006-02-01")
+								if err != nil {
+									return err
+								}
+							}
 							shrt := &goshrt.Shrt{
 								ID:     c.Int("id"),
 								Domain: c.String("domain"),
 								Slug:   c.String("slug"),
 								Dest:   c.String("dest"),
-								// TODO: Add expiry here, must parse timestamp
+								Expiry: t,
 							}
 							if shrt.Domain == "" || shrt.Dest == "" {
 								return goshrt.ErrInvalid
@@ -100,7 +109,7 @@ func main() {
 								Address: a.Server.Address,
 								Key:     a.Client.Key,
 							}
-							err := client.ShrtAdd(shrt)
+							err = client.ShrtAdd(shrt)
 							if err != nil {
 								return err
 							}
@@ -115,12 +124,20 @@ func main() {
 						Usage:    "get shrt details, needs either id or domain and slug ",
 						Flags:    shrtFlags,
 						Action: func(c *cli.Context) error {
+							var t time.Time
+							var err error
+							if c.String("expiry") != "" {
+								t, err = time.Parse(c.String("expiry"), "2006-02-01")
+								if err != nil {
+									return err
+								}
+							}
 							shrt := &goshrt.Shrt{
 								ID:     c.Int("id"),
 								Domain: c.String("domain"),
 								Slug:   c.String("slug"),
 								Dest:   c.String("dest"),
-								// TODO: Add expiry here, must parse timestamp
+								Expiry: t,
 							}
 							if shrt.ID == 0 {
 								if shrt.Domain == "" || shrt.Slug == "" {
@@ -131,7 +148,7 @@ func main() {
 								Address: a.Server.Address,
 								Key:     a.Client.Key,
 							}
-							err := client.ShrtGet(shrt)
+							err = client.ShrtGet(shrt)
 							if err != nil {
 								return err
 							}
