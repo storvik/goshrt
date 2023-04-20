@@ -17,7 +17,7 @@ func (c *client) Shrt(d, s string) (*goshrt.Shrt, error) {
 		Slug:   s,
 	}
 	t := sql.NullTime{}
-	err := c.db.QueryRow("SELECT id, dest, expiry FROM shrts WHERE domain=$1 AND slug=$2", d, s).Scan(&shrt.ID, &shrt.Dest, &t)
+	err := c.db.QueryRow("SELECT id, dest, expiry FROM shrts WHERE deleted!=true AND domain=$1 AND slug=$2", d, s).Scan(&shrt.ID, &shrt.Dest, &t)
 	if err == sql.ErrNoRows {
 		return nil, goshrt.ErrNotFound
 	}
@@ -36,7 +36,7 @@ func (c *client) ShrtByID(id int) (*goshrt.Shrt, error) {
 		ID: id,
 	}
 	t := sql.NullTime{}
-	err := c.db.QueryRow("SELECT domain, slug, dest, expiry FROM shrts WHERE id=$1", id).Scan(&shrt.Domain, &shrt.Slug, &shrt.Dest, &t)
+	err := c.db.QueryRow("SELECT domain, slug, dest, expiry FROM shrts WHERE deleted!=true AND id=$1", id).Scan(&shrt.Domain, &shrt.Slug, &shrt.Dest, &t)
 	if err == sql.ErrNoRows {
 		return nil, goshrt.ErrNotFound
 	}
@@ -55,7 +55,7 @@ func (c *client) CreateShrt(s *goshrt.Shrt) error {
 	if s.Dest == "" || s.Domain == "" || s.Slug == "" {
 		return goshrt.ErrInvalid
 	}
-	rows, err := c.db.Query("SELECT expiry FROM shrts WHERE domain=$1 AND slug=$2", s.Domain, s.Slug)
+	rows, err := c.db.Query("SELECT expiry FROM shrts WHERE deleted!=true AND domain=$1 AND slug=$2", s.Domain, s.Slug)
 	if err != nil {
 		return err
 	}
@@ -105,7 +105,7 @@ func (c *client) DeleteByID(id int) (*goshrt.Shrt, error) {
 	if t.Valid {
 		shrt.Expiry = t.Time
 	}
-	_, err = c.db.Exec("DELETE FROM shrts WHERE id=$1", id)
+	_, err = c.db.Exec("UPDATE shrts SET deleted=true WHERE id=$1", id)
 	if err != nil {
 		return nil, err
 	}
@@ -116,7 +116,7 @@ func (c *client) DeleteByID(id int) (*goshrt.Shrt, error) {
 // at all, should seriously add pagination to this.
 func (c *client) Shrts() ([]*goshrt.Shrt, error) {
 	var shrts []*goshrt.Shrt
-	rows, err := c.db.Query("SELECT id, domain, slug, dest, expiry FROM shrts")
+	rows, err := c.db.Query("SELECT id, domain, slug, dest, expiry FROM shrts WHERE deleted!=true")
 	if err == sql.ErrNoRows {
 		return nil, goshrt.ErrNotFound
 	}
@@ -144,7 +144,7 @@ func (c *client) Shrts() ([]*goshrt.Shrt, error) {
 // at all, should seriously add pagination to this.
 func (c *client) ShrtsByDomain(d string) ([]*goshrt.Shrt, error) {
 	var shrts []*goshrt.Shrt
-	rows, err := c.db.Query("SELECT id, domain, slug, dest, expiry FROM shrts WHERE domain=$1", d)
+	rows, err := c.db.Query("SELECT id, domain, slug, dest, expiry FROM shrts WHERE deleted!=true AND domain=$1", d)
 	if err != nil {
 		return nil, err
 	}

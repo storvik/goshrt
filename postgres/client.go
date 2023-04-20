@@ -52,7 +52,8 @@ func (c *client) Migrate() error {
    domain text not null,
    slug text not null,
    dest text not null,
-   expiry date
+   expiry date,
+   deleted bool default false
 );`
 	_, err := c.db.Exec(m)
 	return err
