@@ -2,6 +2,7 @@
 
 [![build](https://github.com/storvik/goshrt/actions/workflows/build.yml/badge.svg)](https://github.com/storvik/goshrt/actions/workflows/build.yml)
 [![go test](https://github.com/storvik/goshrt/actions/workflows/gotest.yml/badge.svg)](https://github.com/storvik/goshrt/actions/workflows/gotest.yml)
+[![nix build](https://github.com/storvik/goshrt/actions/workflows/nix.yml/badge.svg)](https://github.com/storvik/goshrt/actions/workflows/nix.yml)
 
 > Work in progress!
 

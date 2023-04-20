@@ -146,7 +146,6 @@ func (s *Server) shrtCreateHandler() http.HandlerFunc {
 		if shrt.Slug == "" {
 			shrt.Slug = goshrt.GenerateSlug(s.SlugLength)
 		}
-		// TODO: Shuld check if slug starts with /api and return error
 		if !shrt.ValidDest() || !goshrt.ValidateSlug(shrt.Slug) {
 			response, _ := json.Marshal(map[string]string{"response": "error storing shrt"})
 			w.Header().Set("Content-Type", "application/json; charset=utf-8")

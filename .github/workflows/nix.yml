@@ -1,0 +1,19 @@
+name: nix ci
+on: [push, pull_request]
+jobs:
+  gotest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: nixbuild/nix-quick-install-action@v22
+        with:
+          nix_conf: experimental-features = nix-command flakes
+      - name: nix build goshrt
+        run: |
+          nix build .#goshrt
+      - name: nix build goshrtc
+        run: |
+          nix build .#goshrtc
+      - name: nix module
+        run: |
+          nix build .#nixosConfigurations.container.config.system.build.toplevel

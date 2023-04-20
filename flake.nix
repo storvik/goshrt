@@ -32,15 +32,24 @@
     in
     {
 
-      overlays.default = import ./overlay.nix { inherit pkgs; };
+      overlays.default = import ./nix/overlay.nix { inherit pkgs; };
 
-      nixosModules.goshrt = import ./module.nix self;
+      nixosModules.goshrt = import ./nix/module.nix self;
+
+      # Small container which is meant to test nixos module in CI
+      nixosConfigurations.container = nixpkgs.lib.nixosSystem {
+        system = "x86_64-linux";
+        modules = [
+          self.nixosModules.goshrt
+          ./nix/module_test.nix
+        ];
+      };
 
       packages."x86_64-linux" = {
-        goshrt = pkgs.callPackage ./goshrt.nix { };
-        goshrtc = pkgs.callPackage ./goshrtc.nix { };
+        goshrt = pkgs.callPackage ./nix/goshrt.nix { };
+        goshrtc = pkgs.callPackage ./nix/goshrtc.nix { };
 
-        default = pkgs.callPackage ./goshrt.nix { };
+        default = pkgs.callPackage ./nix/goshrt.nix { };
       };
 
       devShells."x86_64-linux".default = import ./shell.nix { inherit pkgs; };
