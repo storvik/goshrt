@@ -14,8 +14,6 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-// TODO: Better error descriptions in client
-
 // AppConfig represents application configuration
 type AppConfig struct {
 	Client struct {
@@ -62,7 +60,6 @@ func main() {
 			} else if err := toml.Unmarshal(buf, appcfg); err != nil {
 				return err
 			}
-			// TODO: Should check config file better, ex validate server address
 			a = appcfg
 			return nil
 		},
@@ -92,6 +89,7 @@ func main() {
 							if c.String("expiry") != "" {
 								t, err = time.Parse(c.String("expiry"), "2006-02-01")
 								if err != nil {
+									fmt.Println("Error parsing expiry timestamp, must be YYYY-MM-DD")
 									return err
 								}
 							}
@@ -103,6 +101,7 @@ func main() {
 								Expiry: t,
 							}
 							if shrt.Domain == "" || shrt.Dest == "" {
+								fmt.Println("Cannot add shrt without domain and destination.")
 								return goshrt.ErrInvalid
 							}
 							client := &http.Client{
@@ -111,6 +110,7 @@ func main() {
 							}
 							err = client.ShrtAdd(shrt)
 							if err != nil {
+								fmt.Println("Error adding shrt.")
 								return err
 							}
 							fmt.Printf("Shrt successfully added!\n\n")
@@ -129,6 +129,7 @@ func main() {
 							if c.String("expiry") != "" {
 								t, err = time.Parse(c.String("expiry"), "2006-02-01")
 								if err != nil {
+									fmt.Println("Error parsing expiry timestamp, must be YYYY-MM-DD")
 									return err
 								}
 							}
@@ -141,6 +142,7 @@ func main() {
 							}
 							if shrt.ID == 0 {
 								if shrt.Domain == "" || shrt.Slug == "" {
+									fmt.Println("Cannot get shrt without domain or slug")
 									return goshrt.ErrInvalid
 								}
 							}
@@ -150,6 +152,7 @@ func main() {
 							}
 							err = client.ShrtGet(shrt)
 							if err != nil {
+								fmt.Println("Error getting shrt.")
 								return err
 							}
 							shrt.Printp()
@@ -166,6 +169,7 @@ func main() {
 								ID: c.Int("id"),
 							}
 							if shrt.ID == 0 {
+								fmt.Println("Error, invalid ID.")
 								return goshrt.ErrInvalid
 							}
 							client := &http.Client{
@@ -174,6 +178,7 @@ func main() {
 							}
 							err := client.ShrtDelete(shrt)
 							if err != nil {
+								fmt.Println("Error deleting shrt.")
 								return err
 							}
 							fmt.Printf("Shrt successfully deleted!\n\n")
@@ -193,6 +198,7 @@ func main() {
 							}
 							shrts, err := client.ShrtGetList(c.String("domain"))
 							if err != nil {
+								fmt.Println("Error getting shrt list.")
 								return err
 							}
 							printList(shrts)
