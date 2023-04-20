@@ -30,3 +30,27 @@ func TestShrt_Validation(t *testing.T) {
 	})
 
 }
+
+func TestShrt_ValidateSlug(t *testing.T) {
+
+	t.Run("OK", func(t *testing.T) {
+		var tests = []struct {
+			slug  string
+			valid bool
+		}{
+			{"rRwfyu9", true},
+			{"api/rstrst", false},
+			{"apitrten", true},
+			{"239874str", true},
+			{"rst?strrts", false},
+			{"rst#strrts", false},
+		}
+
+		for _, tt := range tests {
+			b := goshrt.ValidateSlug(tt.slug)
+			if b != tt.valid {
+				t.Errorf("%s: expected valid: %t, got %t", tt.slug, tt.valid, b)
+			}
+		}
+	})
+}

@@ -3,6 +3,7 @@ package goshrt
 import (
 	"fmt"
 	"net/url"
+	"regexp"
 	"strings"
 	"time"
 )
@@ -70,4 +71,10 @@ func GenerateSlug(l uint64) string {
 		encodedBuilder.WriteByte(slugAlphabet[(l % uint64(length))])
 	}
 	return encodedBuilder.String()
+}
+
+// ValidateSlug
+func ValidateSlug(s string) bool {
+	r, _ := regexp.Compile("api/|\\?|#")
+	return !r.Match([]byte(s))
 }
