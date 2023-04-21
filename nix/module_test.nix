@@ -7,24 +7,12 @@
   # Allow nginx through the firewall
   networking.firewall.allowedTCPPorts = [ 80 ];
 
-  services.postgresql = {
-    enable = true;
-    ensureDatabases = [ "goshrt" ];
-    ensureUsers = [
-      {
-        name = "goshrt";
-        ensurePermissions = {
-          "DATABASE goshrt" = "ALL PRIVILEGES";
-        };
-      }
-    ];
-  };
-
   services.goshrt = {
     enable = true;
     httpPort = 8080;
     key = "qTGVn$a&hRJ9385C^z7L!MW5CnwZq3&$";
     database = {
+      enablePostgres = true;
       host = "localhost";
       port = 5432;
       user = "goshrt";

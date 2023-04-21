@@ -49,12 +49,20 @@ in
       description = lib.mdDoc "Slug length for generating random slugs.";
     };
     database = {
+      enablePostgres = mkOption {
+        default = false;
+        type = types.bool;
+        description = lib.mdDoc ''
+          Enable postgres setup. If not enabled `services.postgresql`
+          must be setup manually or non local postgres instance can
+          be used.
+        '';
+      };
       host = mkOption {
         type = types.str;
         default = "127.0.0.1";
         description = lib.mdDoc "Database host address.";
       };
-
       port = mkOption {
         type = types.port;
         default = pg.port;
@@ -68,7 +76,6 @@ in
         default = "goshrt";
         description = lib.mdDoc "Database name.";
       };
-
       user = mkOption {
         type = types.str;
         default = "goshrt";
@@ -94,8 +101,7 @@ in
       after = [ "network.target" "postgresql.service" ];
       path = [ goshrtPkgs ];
       wantedBy = [ "multi-user.target" ];
-      # TODO: prestart should possibly run database migrations, but must add migrate command first
-
+      preStart = "${goshrt} database migrate";
       serviceConfig = {
         Type = "simple";
         ExecStart = "${goshrt}";
@@ -103,7 +109,23 @@ in
       };
     };
 
+    services.postgresql = mkIf cfg.database.enablePostgres {
+      enable = true;
+      ensureDatabases = [ cfg.database.name ];
+      ensureUsers = [
+        {
+          name = cfg.database.user;
+          ensurePermissions = {
+            "DATABASE ${cfg.database.name}" = "ALL PRIVILEGES";
+          };
+        }
+      ];
+    };
+
     warnings =
+      optional cfg.database.enablePostgres ''
+        config.services.goshrt.database.enablePostgres will make sure postgres service is configured and running. However password must be set manually with, ALTER USER [username] WITH PASSWORD '[password]';
+      '' ++
       optional (cfg.database.password != "") ''
         config.services.goshrt.database.password will be stored as plaintext in the Nix store. Use database.passwordFile instead (when it's implemented).
       '';
