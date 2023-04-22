@@ -76,6 +76,8 @@ This is how the provided NixOS module can be used in another flake:
 2. Import goshrt service module
 3. Configure service, see `module.nix` for options
 
+The following example enables goshrt module with postgres and nginx reverse proxy.
+
 ``` nix
 {
   inputs = {
@@ -98,25 +100,27 @@ This is how the provided NixOS module can be used in another flake:
           ({ pkgs, ... }: {
             networking.firewall.allowedTCPPorts = [ 8080 ];
 
-            services.postgresql = {
-              enable = true;
-              ensureDatabases = [ "goshrt" ];
-              ensureUsers = [
-                {
-                  name = "goshrt";
-                  ensurePermissions = {
-                    "DATABASE goshrt" = "ALL PRIVILEGES";
-                  };
-                }
-              ];
-            };
+            # Needed because of `nginx.virtualHosts..enableACME`
+            security.acme.acceptTerms = true;
+            security.acme.defaults.email = "goshrt@example.com";
 
             services.goshrt = {
               enable = true;
               httpPort = 8080;
               key = "qTGVn$a&hRJ9385C^z7L!MW5CnwZq3&$";
+              database = {
+                enable = true; # Let goshrt module setup postgresql service
+                host = "localhost";
+                port = 5432;
+                user = "goshrt";
+                password = "trhsog";
+              };
+              nginx = {
+                enable = true; # Enable automatic nginx proxy with SSL and LetsEncrypt certificates
+                hostnames = [ "examplename1.com" "examplename2.com" ];
+                extraConfig = { forceSSL = true; enableACME = true; };
+              };
             };
-
           })
         ];
       };
@@ -132,7 +136,7 @@ $ sudo -u postgres psql goshrt
 > ALTER USER goshrt WITH PASSWORD 'trhsog';
 ```
 
-> This does not setup forwarding. Typically a nginx reverse proxy, or similar, should be used to forward requests to goshrt.
+> This includes potsgres and nginx proxy. If `config.services.goshrt.database.enable` and `config.services.goshrt.nginx.enable` is false both postgres and proxy must be setup manually.
 
 ## Development
 

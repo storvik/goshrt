@@ -24,6 +24,22 @@ let
     password = "${cfg.database.password}"
     address = "${cfg.database.host}:${(toString cfg.database.port)}"
   '';
+  forEachHost = genAttrs cfg.nginx.hostnames;
+  virtualHostsConfig = forEachHost
+    (name: {
+      forceSSL = true;
+      enableACME = true;
+      locations."/" = {
+        extraConfig = ''
+          proxy_max_temp_file_size 0;
+          proxy_set_header Host               $host;
+          proxy_set_header X-Real-IP          $remote_addr;
+          proxy_set_header X-Forwarded-For    $proxy_add_x_forwarded_for;
+          proxy_set_header X-Forwarded-Proto  https;
+        '';
+        proxyPass = "http://goshrt";
+      };
+    } // cfg.nginx.extraConfig);
 in
 
 {
@@ -48,8 +64,32 @@ in
       type = types.int;
       description = lib.mdDoc "Slug length for generating random slugs.";
     };
+    nginx = {
+      enable = mkOption {
+        default = false;
+        type = types.bool;
+        description = lib.mdDoc ''
+          Enable nginx proxy. If not enabled proxy must be set up manually.
+          Use extraArgs to set up reverse proxy / pass other options to
+          services.nginx.
+        '';
+      };
+      hostnames = mkOption {
+        default = [ ];
+        type = types.listOf types.str;
+        description = lib.mdDoc "List of hostnames to work with goshrt.";
+      };
+      extraConfig = mkOption {
+        default = { };
+        type = types.anything;
+        description = lib.mdDoc ''
+          Attribute set with extra nginx config. For example to enable SSL
+          and ACME add `{ forceSSL = true; enableACME = true; }`.
+        '';
+      };
+    };
     database = {
-      enablePostgres = mkOption {
+      enable = mkOption {
         default = false;
         type = types.bool;
         description = lib.mdDoc ''
@@ -109,7 +149,7 @@ in
       };
     };
 
-    services.postgresql = mkIf cfg.database.enablePostgres {
+    services.postgresql = mkIf cfg.database.enable {
       enable = true;
       ensureDatabases = [ cfg.database.name ];
       ensureUsers = [
@@ -122,9 +162,17 @@ in
       ];
     };
 
+    services.nginx = mkIf cfg.nginx.enable {
+      enable = true;
+      upstreams.goshrt = {
+        servers = { "localhost:${(toString cfg.httpPort)}" = { }; };
+      };
+      virtualHosts = virtualHostsConfig;
+    };
+
     warnings =
-      optional cfg.database.enablePostgres ''
-        config.services.goshrt.database.enablePostgres will make sure postgres service is configured and running. However password must be set manually with, ALTER USER [username] WITH PASSWORD '[password]';
+      optional cfg.database.enable ''
+        config.services.goshrt.database.enable will make sure postgres service is configured and running. However password must be set manually with, ALTER USER [username] WITH PASSWORD '[password]';
       '' ++
       optional (cfg.database.password != "") ''
         config.services.goshrt.database.password will be stored as plaintext in the Nix store. Use database.passwordFile instead (when it's implemented).
