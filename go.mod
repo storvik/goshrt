@@ -5,7 +5,7 @@ go 1.19
 require (
 	github.com/adrg/xdg v0.4.0
 	github.com/go-chi/chi/v5 v5.0.8
-	github.com/golang-jwt/jwt/v4 v4.4.1
+	github.com/golang-jwt/jwt/v4 v4.5.0
 	github.com/lib/pq v1.10.7
 	github.com/pelletier/go-toml v1.9.5
 	github.com/urfave/cli/v2 v2.25.7
