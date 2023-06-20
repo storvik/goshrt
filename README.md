@@ -43,7 +43,7 @@ The overlay can be added to another flake like this:
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     goshrt = {
-      url = "path:/home/storvik/developer/golang/goshrt";
+      url = "github:golang/goshrt";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };
@@ -83,7 +83,7 @@ The following example enables goshrt module with postgres and nginx reverse prox
   inputs = {
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
     goshrt = {
-      url = "path:/home/storvik/developer/golang/goshrt";
+      url = "github:golang/goshrt";
       inputs.nixpkgs.follows = "nixpkgs";
     };
   };

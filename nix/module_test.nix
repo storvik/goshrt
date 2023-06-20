@@ -19,6 +19,7 @@
       enable = true;
       host = "localhost";
       port = 5432;
+      name = "goshrt";
       user = "goshrt";
       password = "trhsog";
     };
