@@ -1,13 +1,25 @@
-# goshrt - Self hosted URL shortener
+<div align="center">
+    <a href="https://github.com/storvik/goshrt" rel="noopener">
+        <img width=300px height=300px src="https://github.com/storvik/goshrt/blob/master/assets/goshrt.png" alt="goshrt_logo" />
+    </a>
+    <a href="https://github.com/storvik/goshrt" rel="noopener">
+        <h3 align="center">goshrt</h3>
+    </a>
+    <p>Self hosted URL shortener<br />❗ Work in progress!</p>
+</div>
 
-[![build](https://github.com/storvik/goshrt/actions/workflows/build.yml/badge.svg)](https://github.com/storvik/goshrt/actions/workflows/build.yml)
-[![go test](https://github.com/storvik/goshrt/actions/workflows/gotest.yml/badge.svg)](https://github.com/storvik/goshrt/actions/workflows/gotest.yml)
-[![nix build](https://github.com/storvik/goshrt/actions/workflows/nix.yml/badge.svg)](https://github.com/storvik/goshrt/actions/workflows/nix.yml)
+<div align="center">    
+    <a href="https://goreportcard.com/report/github.com/storvik/goshrt"><img src="https://goreportcard.com/badge/github.com/storvik/goshrt" /></a> &nbsp; 
+    <a href="https://github.com/storvik/goshrt/actions/workflows/build.yml"><img src="https://github.com/storvik/goshrt/actions/workflows/build.yml/badge.svg" /></a> &nbsp; 
+    <a href="https://github.com/storvik/goshrt/actions/workflows/gotest.yml"><img src="https://github.com/storvik/goshrt/actions/workflows/gotest.yml/badge.svg" /></a> &nbsp; 
+    <a href="https://github.com/storvik/goshrt/actions/workflows/nix.yml"><img src="https://github.com/storvik/goshrt/actions/workflows/nix.yml/badge.svg" /></a>
+</div>
 
-> Work in progress!
+--- 
 
 This is my attempt at creating a self hosted URL shortener written in Go.
 The goal is to support multiple domains, cache, a simple API for creating new entries and a command line client.
+Even though I use this in production bugs should be expected. 
 
 <!-- markdown-toc start - Don't edit this section. Run M-x markdown-toc-refresh-toc -->
 **Table of Contents**
