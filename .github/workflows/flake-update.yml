@@ -1,0 +1,19 @@
+name: "Update flake lockfile"
+on:
+  repository_dispatch:
+  workflow_dispatch:
+  schedule:
+    - cron:  '30 5 * * 5'
+jobs:
+  createPullRequest:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Update flake.lock
+        uses: DeterminateSystems/update-flake-lock@v20
+        with:
+          token: ${{ secrets.GH_TOKEN_FOR_FLAKE_UPDATE }}
+          pr-title: "Update flake.lock" 
+          pr-labels: |
+            nix
+            automated
