@@ -8,10 +8,16 @@ jobs:
   createPullRequest:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: nixbuild/nix-quick-install-action@v22
+      - name: Checkout repo
+        uses: actions/checkout@v4
+      - name: Install nix
+        uses: nixbuild/nix-quick-install-action@v22
         with:
           nix_conf: experimental-features = nix-command flakes
+      - name: Run gomod2nix generate
+        run: |
+          nix develop --command \
+            gomod2nix generate
       - name: Update flake.lock
         uses: DeterminateSystems/update-flake-lock@v20
         with:
