@@ -17,20 +17,22 @@ type client struct {
 	user     string
 	password string
 	address  string
+	schema   string
 }
 
-func NewClient(n, u, p, a string) goshrt.ShrtStorer {
+func NewClient(n, u, p, a, s string) goshrt.ShrtStorer {
 	return &client{
 		name:     n,
 		user:     u,
 		password: p,
 		address:  a,
+		schema:   s,
 	}
 }
 
 // Open connects to database using info stored in client.
 func (c *client) Open() error {
-	connStr := fmt.Sprintf("postgresql://%s:%s@%s/%s?sslmode=disable", c.user, c.password, c.address, c.name)
+	connStr := fmt.Sprintf("postgresql://%s:%s@%s/%s?sslmode=disable&search_path=%s", c.user, c.password, c.address, c.name, c.schema)
 	var err error
 	c.db, err = sql.Open("postgres", connStr)
 	if err != nil {
@@ -47,7 +49,7 @@ func (c *client) Close() error {
 // Migrate aims to migrate database, gracefully.
 func (c *client) Migrate() error {
 	m := `
- CREATE TABLE IF NOT EXISTS shrts(
+ CREATE TABLE IF NOT EXISTS goshrt.shrts(
    id serial primary key,
    domain text not null,
    slug text not null,

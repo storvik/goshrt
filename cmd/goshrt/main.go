@@ -3,7 +3,6 @@ package main
 import (
 	"errors"
 	"fmt"
-	"io/ioutil"
 	"log"
 	"os"
 
@@ -27,6 +26,7 @@ type AppConfig struct {
 		User     string `toml:"user"`     // database username
 		Password string `toml:"password"` // database password
 		Address  string `toml:"address"`  // database address
+		Schema   string `toml:"schema"`   // database schema, public if not used
 		Port     string `toml:"port"`     // database port
 	} `toml:"database"`
 }
@@ -71,7 +71,7 @@ func main() {
 				}
 			}
 			// a.infoLog.Printf("Using config file: %s\n", cfg)
-			if buf, err := ioutil.ReadFile(cfg); err != nil {
+			if buf, err := os.ReadFile(cfg); err != nil {
 				return err
 			} else if err := toml.Unmarshal(buf, appcfg); err != nil {
 				return err
@@ -155,7 +155,7 @@ func main() {
 						Name:  "migrate",
 						Usage: "migrate database, no other instance of goshrt must be running",
 						Action: func(c *cli.Context) error {
-							db := postgres.NewClient(a.cfg.Database.DB, a.cfg.Database.User, a.cfg.Database.Password, a.cfg.Database.Address)
+							db := postgres.NewClient(a.cfg.Database.DB, a.cfg.Database.User, a.cfg.Database.Password, a.cfg.Database.Address, a.cfg.Database.Schema)
 							if err := db.Open(); err != nil {
 								return err
 							}

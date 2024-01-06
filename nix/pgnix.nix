@@ -16,6 +16,7 @@ with pkgs; [
     createdb --port=${dbport} --host=localhost --username=postgres -O postgres ${dbname}
     psql -d postgres -U postgres -h localhost -p ${dbport} -c "create user ${dbuser} with encrypted password '${dbpass}';"
     psql -d postgres -U postgres -h localhost -p ${dbport} -c "grant all privileges on database ${dbname} to ${dbuser};"
+    psql -d ${dbname} -U postgres -h localhost -p ${dbport} -c "CREATE SCHEMA goshrt AUTHORIZATION ${dbuser};"
   '')
   (writeScriptBin "pgnix-start" ''
     pg_ctl -D ${pgdata} -l ${pgdata}/postgres.log  -o "-p ${dbport} -k /tmp -i" start
