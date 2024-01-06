@@ -19,7 +19,7 @@ func (a *application) Serve() error {
 
 	// Setup server and attach interfaces
 	auth := token.NewAuth(a.cfg.Server.Key)
-	db := postgres.NewClient(a.cfg.Database.DB, a.cfg.Database.User, a.cfg.Database.Password, a.cfg.Database.Address)
+	db := postgres.NewClient(a.cfg.Database.DB, a.cfg.Database.User, a.cfg.Database.Password, a.cfg.Database.Address, a.cfg.Database.Schema)
 	err := db.Open()
 	if err != nil {
 		return err
