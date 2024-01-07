@@ -3,11 +3,12 @@
 , go
 , lib
 , buildGoApplication
+, version
 }:
 
 buildGoApplication rec {
+  inherit version;
   pname = "goshrt";
-  version = "0.0.1";
   pwd = ./..;
   src = ./..;
   subPackages = [ "cmd/goshrt" ];

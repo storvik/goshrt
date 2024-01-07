@@ -28,6 +28,7 @@
           self.overlays.default
         ];
       };
+      version = "0.3.0";
       inherit (gitignore.lib) gitignoreSource;
     in
     {
@@ -46,10 +47,9 @@
       };
 
       packages."x86_64-linux" = {
-        goshrt = pkgs.callPackage ./nix/goshrt.nix { };
-        goshrtc = pkgs.callPackage ./nix/goshrtc.nix { };
-
-        default = pkgs.callPackage ./nix/goshrt.nix { };
+        goshrt = pkgs.callPackage ./nix/goshrt.nix { inherit version; };
+        goshrtc = pkgs.callPackage ./nix/goshrtc.nix { inherit version; };
+        default = pkgs.callPackage ./nix/goshrt.nix { inherit version; };
       };
 
       devShells."x86_64-linux".default = import ./shell.nix { inherit pkgs; };
