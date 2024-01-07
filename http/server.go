@@ -51,7 +51,7 @@ func NewServer(l *log.Logger, p string) *Server {
 
 	// Index and shortener routes
 	r.Get("/", indexHandler())
-	r.Get("/{slug}", s.shrtHandler())
+	r.Get("/*", s.shrtHandler())
 
 	// API routes
 	r.Route("/api", func(r chi.Router) {
@@ -105,7 +105,7 @@ func indexHandler() http.HandlerFunc {
 func (s *Server) shrtHandler() http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		t := time.Now()
-		slug := chi.URLParam(r, "slug")
+		slug := chi.URLParam(r, "*")
 		if slug == "" {
 			s.ErrorLog.Println("Could not get empty slug")
 			w.Header().Set("Content-Type", "text/html")
