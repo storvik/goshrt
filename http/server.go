@@ -7,10 +7,13 @@ import (
 	"net"
 	"net/http"
 	"strconv"
+	"strings"
+	"text/template"
 	"time"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/storvik/goshrt"
+	"github.com/storvik/goshrt/assets"
 )
 
 // TODO: Add tests using httptest
@@ -21,6 +24,7 @@ type Server struct {
 	ln         net.Listener
 	server     *http.Server
 	router     *chi.Mux
+	tmpl       *template.Template // landing page template
 	InfoLog    *log.Logger
 	ErrorLog   *log.Logger
 	SlugLength uint64
@@ -30,10 +34,18 @@ type Server struct {
 	ShrtStore goshrt.ShrtStorer
 }
 
+// landingInfo holds landing page info to be used with landingpage template
+type landingInfo struct {
+	Title   string
+	Message string
+}
+
 // NewServer creates new http server with given errorlogger and port.
 func NewServer(l *log.Logger, p string) *Server {
 	// Create router
 	r := chi.NewRouter()
+
+	t := template.Must(template.ParseFS(assets.InternalAssets, "landingpage.tmpl"))
 
 	// Create server instance and attach router
 	s := &Server{
@@ -46,12 +58,31 @@ func NewServer(l *log.Logger, p string) *Server {
 			IdleTimeout:  time.Second * 60,
 		},
 		router:   r,
+		tmpl:     t,
 		ErrorLog: l,
 	}
 
+	// Load public assets to be served by http server
+	var public = http.FS(assets.PublicAssets)
+	publicFS := http.FileServer(public)
+
 	// Index and shortener routes
-	r.Get("/", indexHandler())
+	r.Get("/", s.indexHandler())
 	r.Get("/*", s.shrtHandler())
+
+	// Not found handler
+	r.NotFound(func(w http.ResponseWriter, r *http.Request) {
+		s.landingpage(w, r, landingInfo{Title: "404", Message: "Content not found"})
+		w.WriteHeader(http.StatusNotFound)
+	})
+
+	// Public assets
+	r.Get("/public/*", func(w http.ResponseWriter, r *http.Request) {
+		rctx := chi.RouteContext(r.Context())
+		pathPrefix := strings.TrimSuffix(rctx.RoutePattern(), "/*")
+		fs := http.StripPrefix(pathPrefix, publicFS)
+		fs.ServeHTTP(w, r)
+	})
 
 	// API routes
 	r.Route("/api", func(r chi.Router) {
@@ -92,23 +123,20 @@ func (s *Server) Shutdown(ctx context.Context) error {
 	return nil
 }
 
-func indexHandler() http.HandlerFunc {
+func (s *Server) indexHandler() http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		response, _ := json.Marshal(map[string]string{"response": "Index endpoint. Probably should do something clever here."})
-		w.Header().Set("Content-Type", "application/json; charset=utf-8")
-		w.WriteHeader(http.StatusOK)
-		w.Write(response)
+		w.Header().Set("Content-Type", "text/html; charset=utf-8")
+		s.tmpl.Execute(w, landingInfo{Title: "Goshrt", Message: "Self hosted URL shortener written in Go!"})
 	})
 }
 
-// TODO: Better looking error site
 func (s *Server) shrtHandler() http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		t := time.Now()
 		slug := chi.URLParam(r, "*")
 		if slug == "" {
 			s.ErrorLog.Println("Could not get empty slug")
-			w.Header().Set("Content-Type", "text/html")
+			s.landingpage(w, r, landingInfo{Title: "Goshrt error", Message: "Slug is empty, that shouldn't happen!"})
 			w.WriteHeader(http.StatusNotFound)
 			return
 		}
@@ -117,12 +145,12 @@ func (s *Server) shrtHandler() http.HandlerFunc {
 		shrt, err := s.ShrtStore.Shrt(r.Host, slug)
 		if err == goshrt.ErrNotFound {
 			s.InfoLog.Println("Could not find, " + r.Host + "/" + slug)
-			w.Header().Set("Content-Type", "text/html")
+			s.landingpage(w, r, landingInfo{Title: "Goshrt error", Message: "Slug not found"})
 			w.WriteHeader(http.StatusNotFound)
 			return
 		} else if err != nil {
 			s.ErrorLog.Println("Could not get shrt, " + err.Error())
-			w.Header().Set("Content-Type", "text/html")
+			s.landingpage(w, r, landingInfo{Title: "Goshrt error", Message: "Something went wrong"})
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
@@ -272,4 +300,9 @@ func (s *Server) shrtListHandler() http.HandlerFunc {
 		w.WriteHeader(http.StatusOK)
 		w.Write(response)
 	})
+}
+
+func (s *Server) landingpage(w http.ResponseWriter, r *http.Request, info landingInfo) {
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	s.tmpl.Execute(w, info)
 }
