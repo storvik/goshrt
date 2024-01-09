@@ -4,8 +4,10 @@ jobs:
   gotest:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: nixbuild/nix-quick-install-action@v22
+      - name: Checkout repo
+        uses: actions/checkout@v3
+      - name: Install nix
+        uses: nixbuild/nix-quick-install-action@v22
         with:
           nix_conf: experimental-features = nix-command flakes
       - name: nix build goshrt

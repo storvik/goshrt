@@ -1,20 +1,24 @@
-name: go test
-on: [push, pull_request]
+name: vuln
+permissions: {}
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+  schedule:
+    - cron: "0 5 * * 3"
+  workflow_call:
 jobs:
-  gotest:
+  vuln:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
       - name: Install nix
         uses: nixbuild/nix-quick-install-action@v22
         with:
           nix_conf: experimental-features = nix-command flakes
-      - name: Start postgres database
+      - name: Run govulncheck
         run: |
           nix develop --command \
-            pgnix-init
-      - name: Run gotests
-        run: |
-          nix develop --command \
-            go test -v ./...
+            govulncheck -test ./...
