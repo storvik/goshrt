@@ -9,11 +9,21 @@
 </div>
 
 <div align="center">
-    <a href="https://goreportcard.com/report/github.com/storvik/goshrt"><img src="https://goreportcard.com/badge/github.com/storvik/goshrt" /></a> &nbsp;
+    <a href="https://github.com/storvik/goshrt/blob/master/LICENSE"><img src="https://img.shields.io/github/license/storvik/goshrt"></a> &nbsp;
+    <a href="https://github.com/storvik/goshrt/releases"><img src="https://img.shields.io/github/v/release/storvik/goshrt?include_prereleases"></a>
+</div>
+
+<div align="center">
     <a href="https://github.com/storvik/goshrt/actions/workflows/build.yml"><img src="https://github.com/storvik/goshrt/actions/workflows/build.yml/badge.svg" /></a> &nbsp;
     <a href="https://github.com/storvik/goshrt/actions/workflows/gotest.yml"><img src="https://github.com/storvik/goshrt/actions/workflows/gotest.yml/badge.svg" /></a> &nbsp;
-    <a href="https://github.com/storvik/goshrt/actions/workflows/vuln.yml"><img src="https://github.com/storvik/goshrt/actions/workflows/vuln.yml/badge.svg" /></a> &nbsp;
     <a href="https://github.com/storvik/goshrt/actions/workflows/nix.yml"><img src="https://github.com/storvik/goshrt/actions/workflows/nix.yml/badge.svg" /></a>
+</div>
+
+<div align="center">
+    <a href="https://goreportcard.com/report/github.com/storvik/goshrt"><img src="https://goreportcard.com/badge/github.com/storvik/goshrt" /></a> &nbsp;
+    <a href="https://github.com/storvik/goshrt/actions/workflows/lint.yml"><img src="https://github.com/storvik/goshrt/actions/workflows/lint.yml/badge.svg?branch=master" /></a> &nbsp;
+    <a href="https://github.com/storvik/goshrt/actions/workflows/gotest.yml"><img src="https://raw.githubusercontent.com/org/project/badges/.badges/main/coverage.svg" /></a> &nbsp;
+    <a href="https://github.com/storvik/goshrt/actions/workflows/vuln.yml"><img src="https://github.com/storvik/goshrt/actions/workflows/vuln.yml/badge.svg" /></a>
 </div>
 
 ---

@@ -19,3 +19,6 @@ jobs:
       - name: nix module
         run: |
           nix build .#nixosConfigurations.container.config.system.build.toplevel
+      - name: nix flake check
+        run: |
+          nix flake check --no-build
