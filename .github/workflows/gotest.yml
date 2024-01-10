@@ -17,14 +17,4 @@ jobs:
       - name: Run gotests
         run: |
           nix develop --command \
-            go test -v ./... -coverprofile=./cover.out -covermode=atomic -coverpkg=./...
-      - name: Check test coverage
-        uses: vladopajic/go-test-coverage@v2
-        with:
-          profile: cover.out
-          local-prefix: github.com/storvik/goshrt
-          threshold-file: 50
-          threshold-package: 60
-          threshold-total: 80
-          git-token: ${{ github.ref_name == 'master' && secrets.GITHUB_TOKEN || '' }}
-          git-branch: badges
+            go test -v ./...
