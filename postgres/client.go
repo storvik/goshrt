@@ -8,9 +8,9 @@ import (
 	"github.com/storvik/goshrt"
 )
 
-var _ goshrt.ShrtStorer = &client{}
+var _ goshrt.ShrtStorer = &Client{}
 
-type client struct {
+type Client struct {
 	db *sql.DB
 
 	name     string
@@ -20,8 +20,8 @@ type client struct {
 	schema   string
 }
 
-func NewClient(n, u, p, a, s string) goshrt.ShrtStorer {
-	return &client{
+func NewClient(n, u, p, a, s string) *Client {
+	return &Client{
 		name:     n,
 		user:     u,
 		password: p,
@@ -31,7 +31,7 @@ func NewClient(n, u, p, a, s string) goshrt.ShrtStorer {
 }
 
 // Open connects to database using info stored in client.
-func (c *client) Open() error {
+func (c *Client) Open() error {
 	var err error
 	connStr := fmt.Sprintf("postgresql://%s:%s@%s/%s?sslmode=disable&search_path=%s", c.user, c.password, c.address, c.name, c.schema)
 
@@ -44,12 +44,12 @@ func (c *client) Open() error {
 }
 
 // Close closes database connection.
-func (c *client) Close() error {
+func (c *Client) Close() error {
 	return c.db.Close()
 }
 
 // Migrate aims to migrate database, gracefully.
-func (c *client) Migrate() error {
+func (c *Client) Migrate() error {
 	m := `
  CREATE TABLE IF NOT EXISTS goshrt.shrts(
    id serial primary key,

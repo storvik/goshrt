@@ -9,10 +9,10 @@ import (
 	"github.com/storvik/goshrt"
 )
 
-var _ goshrt.ShrtStorer = &client{}
+var _ goshrt.ShrtStorer = &Client{}
 
 // Shrt tries to find url in database by domain and slug.
-func (c *client) Shrt(d, s string) (*goshrt.Shrt, error) {
+func (c *Client) Shrt(d, s string) (*goshrt.Shrt, error) {
 	shrt := &goshrt.Shrt{
 		Domain: d,
 		Slug:   s,
@@ -36,7 +36,7 @@ func (c *client) Shrt(d, s string) (*goshrt.Shrt, error) {
 }
 
 // Shrt tries to find url in database by id.
-func (c *client) ShrtByID(id int) (*goshrt.Shrt, error) {
+func (c *Client) ShrtByID(id int) (*goshrt.Shrt, error) {
 	shrt := &goshrt.Shrt{
 		ID: id,
 	}
@@ -60,7 +60,7 @@ func (c *client) ShrtByID(id int) (*goshrt.Shrt, error) {
 
 // CreateShrt creates new shrt in database and returns its id. Has to look for
 // same domain and slug which isn't expired.
-func (c *client) CreateShrt(s *goshrt.Shrt) error {
+func (c *Client) CreateShrt(s *goshrt.Shrt) error {
 	if s.Dest == "" || s.Domain == "" || s.Slug == "" {
 		return goshrt.ErrInvalid
 	}
@@ -107,7 +107,7 @@ func (c *client) CreateShrt(s *goshrt.Shrt) error {
 }
 
 // DeleteByID deletes shrt by id.
-func (c *client) DeleteByID(id int) (*goshrt.Shrt, error) {
+func (c *Client) DeleteByID(id int) (*goshrt.Shrt, error) {
 	shrt := &goshrt.Shrt{
 		ID: id,
 	}
@@ -136,7 +136,7 @@ func (c *client) DeleteByID(id int) (*goshrt.Shrt, error) {
 
 // Shrts retrenves all shorts in database. Note that this is not efficient
 // at all, should seriously add pagination to this.
-func (c *client) Shrts() ([]*goshrt.Shrt, error) {
+func (c *Client) Shrts() ([]*goshrt.Shrt, error) {
 	var shrts []*goshrt.Shrt
 
 	rows, err := c.db.Query("SELECT id, domain, slug, dest, expiry FROM shrts WHERE deleted!=true")
@@ -170,7 +170,7 @@ func (c *client) Shrts() ([]*goshrt.Shrt, error) {
 
 // ShrtsByDomain retrieves all shrts by domain. Note that this is not efficient
 // at all, should seriously add pagination to this.
-func (c *client) ShrtsByDomain(d string) ([]*goshrt.Shrt, error) {
+func (c *Client) ShrtsByDomain(d string) ([]*goshrt.Shrt, error) {
 	var shrts []*goshrt.Shrt
 
 	rows, err := c.db.Query("SELECT id, domain, slug, dest, expiry FROM shrts WHERE deleted!=true AND domain=$1", d)

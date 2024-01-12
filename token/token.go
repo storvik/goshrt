@@ -8,9 +8,9 @@ import (
 	"github.com/storvik/goshrt"
 )
 
-var _ goshrt.Authorizer = &auth{}
+var _ goshrt.Authorizer = &Auth{}
 
-type auth struct {
+type Auth struct {
 	token string // The master token
 }
 
@@ -20,15 +20,15 @@ type claims struct {
 }
 
 // NewAuth returns new jwt tokne authenticator.
-func NewAuth(t string) goshrt.Authorizer {
-	return &auth{
+func NewAuth(t string) *Auth {
+	return &Auth{
 		token: t,
 	}
 }
 
 // Create creates a valid token to be used when authorizing clients.
 // The string `id` is client name, and can by just about anything.
-func (a *auth) Create(id string) (string, error) {
+func (a *Auth) Create(id string) (string, error) {
 	c := claims{
 		jwt.RegisteredClaims{
 			// Omitting Expire
@@ -52,7 +52,7 @@ func (a *auth) Create(id string) (string, error) {
 
 // Validate validates a token string `t` using the secret
 // included in auth struct.
-func (a *auth) Validate(t string) (bool, error) {
+func (a *Auth) Validate(t string) (bool, error) {
 	c := &claims{}
 
 	token, err := jwt.ParseWithClaims(t, c, func(token *jwt.Token) (interface{}, error) {

@@ -22,7 +22,7 @@ func TestDB(t *testing.T) {
 //	Database password:  trhsog
 //	Database address:   localhost:6000
 //	Database schema:    goshrt
-func MustOpenDB(tb testing.TB) goshrt.ShrtStorer {
+func MustOpenDB(tb testing.TB) *postgres.Client {
 	tb.Helper() // This function is a test-helper, not a test
 
 	db := postgres.NewClient("goshrt", "goshrt", "trhsog", "localhost:6000", "goshrt")
