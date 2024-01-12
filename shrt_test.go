@@ -40,6 +40,7 @@ func TestShrt_ValidateSlug(t *testing.T) {
 			{"api", false},
 			{"public/hello", false},
 			{"apitrten", true},
+			{"pubclico", true},
 			{"239874str", true},
 			{"rst?strrts", false},
 			{"rst#strrts", false},

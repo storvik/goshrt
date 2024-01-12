@@ -80,6 +80,6 @@ func GenerateSlug(l uint64) string {
 
 // ValidateSlug validates slug.
 func ValidateSlug(s string) bool {
-	r := regexp.MustCompile(`public/|api/|\\?|#`)
+	r := regexp.MustCompile(`public(\/|$)|api(\/|$)|\?|#`)
 	return !r.MatchString(s)
 }
