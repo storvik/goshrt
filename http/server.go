@@ -3,8 +3,8 @@ package http
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"log"
-	"net"
 	"net/http"
 	"strconv"
 	"strings"
@@ -21,7 +21,6 @@ import (
 // Server type, must be global in order to addach interfaces used
 // in http routes.
 type Server struct {
-	ln         net.Listener
 	server     *http.Server
 	router     *chi.Mux
 	tmpl       *template.Template // landing page template
@@ -34,7 +33,7 @@ type Server struct {
 	ShrtStore goshrt.ShrtStorer
 }
 
-// landingInfo holds landing page info to be used with landingpage template
+// landingInfo holds landing page info to be used with landingpage template.
 type landingInfo struct {
 	Title   string
 	Message string
@@ -72,7 +71,7 @@ func NewServer(l *log.Logger, p string) *Server {
 
 	// Not found handler
 	r.NotFound(func(w http.ResponseWriter, r *http.Request) {
-		s.landingpage(w, r, landingInfo{Title: "404", Message: "Content not found"})
+		s.landingpage(w, landingInfo{Title: "404", Message: "Content not found"})
 		w.WriteHeader(http.StatusNotFound)
 	})
 
@@ -107,7 +106,6 @@ func NewServer(l *log.Logger, p string) *Server {
 	})
 
 	return s
-
 }
 
 func (s *Server) ListenAndServe() error {
@@ -115,18 +113,22 @@ func (s *Server) ListenAndServe() error {
 	if err != nil {
 		return err
 	}
+
 	return nil
 }
 
 func (s *Server) Shutdown(ctx context.Context) error {
-	s.server.Shutdown(ctx)
-	return nil
+	return s.server.Shutdown(ctx)
 }
 
 func (s *Server) indexHandler() http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
-		s.tmpl.Execute(w, landingInfo{Title: "Goshrt", Message: "Self hosted URL shortener written in Go!"})
+
+		err := s.tmpl.Execute(w, landingInfo{Title: "Goshrt", Message: "Self hosted URL shortener written in Go!"})
+		if err != nil {
+			s.ErrorLog.Printf("Error executing template, %s", err.Error())
+		}
 	})
 }
 
@@ -136,21 +138,21 @@ func (s *Server) shrtHandler() http.HandlerFunc {
 		slug := chi.URLParam(r, "*")
 		if slug == "" {
 			s.ErrorLog.Println("Could not get empty slug")
-			s.landingpage(w, r, landingInfo{Title: "Goshrt error", Message: "Slug is empty, that shouldn't happen!"})
+			s.landingpage(w, landingInfo{Title: "Goshrt error", Message: "Slug is empty, that shouldn't happen!"})
 			w.WriteHeader(http.StatusNotFound)
 			return
 		}
 
 		// Parse URL to get domain
 		shrt, err := s.ShrtStore.Shrt(r.Host, slug)
-		if err == goshrt.ErrNotFound {
+		if errors.Is(err, goshrt.ErrNotFound) {
 			s.InfoLog.Println("Could not find, " + r.Host + "/" + slug)
-			s.landingpage(w, r, landingInfo{Title: "Goshrt error", Message: "Slug not found"})
+			s.landingpage(w, landingInfo{Title: "Goshrt error", Message: "Slug not found"})
 			w.WriteHeader(http.StatusNotFound)
 			return
 		} else if err != nil {
 			s.ErrorLog.Println("Could not get shrt, " + err.Error())
-			s.landingpage(w, r, landingInfo{Title: "Goshrt error", Message: "Something went wrong"})
+			s.landingpage(w, landingInfo{Title: "Goshrt error", Message: "Something went wrong"})
 			w.WriteHeader(http.StatusInternalServerError)
 			return
 		}
@@ -178,7 +180,7 @@ func (s *Server) shrtCreateHandler() http.HandlerFunc {
 			response, _ := json.Marshal(map[string]string{"response": "error storing shrt"})
 			w.Header().Set("Content-Type", "application/json; charset=utf-8")
 			w.WriteHeader(http.StatusBadRequest)
-			w.Write(response)
+			s.logResWriterError(w.Write(response))
 			s.ErrorLog.Printf("Invalid request, destination address or slug is not valid\n")
 			return
 		}
@@ -188,7 +190,7 @@ func (s *Server) shrtCreateHandler() http.HandlerFunc {
 			response, _ := json.Marshal(map[string]string{"response": "error storing shrt"})
 			w.Header().Set("Content-Type", "application/json; charset=utf-8")
 			w.WriteHeader(http.StatusInternalServerError)
-			w.Write(response)
+			s.logResWriterError(w.Write(response))
 			s.ErrorLog.Printf("Could not store shrt to database: %s\n", err)
 			return
 		}
@@ -196,14 +198,14 @@ func (s *Server) shrtCreateHandler() http.HandlerFunc {
 		response, _ := json.Marshal(shrt)
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(http.StatusCreated)
-		w.Write(response)
+		s.logResWriterError(w.Write(response))
 	})
 }
 
 func (s *Server) shrtGetHandler() http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var err error
-		shrt := new(goshrt.Shrt)
+		var shrt *goshrt.Shrt
 
 		// If slug is set, domain shold be present
 		// Else ID should be firsts
@@ -216,18 +218,18 @@ func (s *Server) shrtGetHandler() http.HandlerFunc {
 			shrt, err = s.ShrtStore.ShrtByID(idInt)
 		}
 
-		if err == goshrt.ErrNotFound {
+		if errors.Is(err, goshrt.ErrNotFound) {
 			response, _ := json.Marshal(map[string]string{"response": "error retrieving"})
 			w.Header().Set("Content-Type", "application/json; charset=utf-8")
 			w.WriteHeader(http.StatusNotFound)
-			w.Write(response)
+			s.logResWriterError(w.Write(response))
 			s.ErrorLog.Printf("Could not get shrt from database: %s\n", err)
 			return
 		} else if err != nil {
 			response, _ := json.Marshal(map[string]string{"response": "error retrieving"})
 			w.Header().Set("Content-Type", "application/json; charset=utf-8")
 			w.WriteHeader(http.StatusInternalServerError)
-			w.Write(response)
+			s.logResWriterError(w.Write(response))
 			s.ErrorLog.Printf("Could not get shrt from database: %s\n", err)
 			return
 		}
@@ -235,7 +237,7 @@ func (s *Server) shrtGetHandler() http.HandlerFunc {
 		response, _ := json.Marshal(shrt)
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(http.StatusOK)
-		w.Write(response)
+		s.logResWriterError(w.Write(response))
 	})
 }
 
@@ -244,18 +246,18 @@ func (s *Server) shrtDeleteHandler() http.HandlerFunc {
 		id := chi.URLParam(r, "id_domain")
 		idInt, _ := strconv.Atoi(id)
 		shrt, err := s.ShrtStore.DeleteByID(idInt)
-		if err == goshrt.ErrNotFound {
+		if errors.Is(err, goshrt.ErrNotFound) {
 			response, _ := json.Marshal(map[string]string{"response": "could not find item with given id"})
 			w.Header().Set("Content-Type", "application/json; charset=utf-8")
 			w.WriteHeader(http.StatusNotFound)
-			w.Write(response)
+			s.logResWriterError(w.Write(response))
 			s.ErrorLog.Printf("Could not find and delete shrt with id %d, %s\n", idInt, err)
 			return
 		} else if err != nil {
 			response, _ := json.Marshal(map[string]string{"response": "error retrieving"})
 			w.Header().Set("Content-Type", "application/json; charset=utf-8")
 			w.WriteHeader(http.StatusInternalServerError)
-			w.Write(response)
+			s.logResWriterError(w.Write(response))
 			s.ErrorLog.Printf("Could not get shrt from database: %s\n", err)
 			return
 		}
@@ -263,7 +265,7 @@ func (s *Server) shrtDeleteHandler() http.HandlerFunc {
 		response, _ := json.Marshal(shrt)
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(http.StatusOK)
-		w.Write(response)
+		s.logResWriterError(w.Write(response))
 	})
 }
 
@@ -279,18 +281,18 @@ func (s *Server) shrtListHandler() http.HandlerFunc {
 			shrts, err = s.ShrtStore.ShrtsByDomain(domain)
 		}
 
-		if err == goshrt.ErrNotFound {
+		if errors.Is(err, goshrt.ErrNotFound) {
 			response, _ := json.Marshal(map[string]string{"response": "error retrieving"})
 			w.Header().Set("Content-Type", "application/json; charset=utf-8")
 			w.WriteHeader(http.StatusNotFound)
-			w.Write(response)
+			s.logResWriterError(w.Write(response))
 			s.ErrorLog.Printf("Could not get shrts from database: %s\n", err)
 			return
 		} else if err != nil {
 			response, _ := json.Marshal(map[string]string{"response": "error retrieving"})
 			w.Header().Set("Content-Type", "application/json; charset=utf-8")
 			w.WriteHeader(http.StatusInternalServerError)
-			w.Write(response)
+			s.logResWriterError(w.Write(response))
 			s.ErrorLog.Printf("Could not get shrts from database: %s\n", err)
 			return
 		}
@@ -298,11 +300,15 @@ func (s *Server) shrtListHandler() http.HandlerFunc {
 		response, _ := json.Marshal(shrts)
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(http.StatusOK)
-		w.Write(response)
+		s.logResWriterError(w.Write(response))
 	})
 }
 
-func (s *Server) landingpage(w http.ResponseWriter, r *http.Request, info landingInfo) {
+func (s *Server) landingpage(w http.ResponseWriter, info landingInfo) {
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	s.tmpl.Execute(w, info)
+
+	err := s.tmpl.Execute(w, info)
+	if err != nil {
+		s.ErrorLog.Printf("Error executing template, %s", err.Error())
+	}
 }

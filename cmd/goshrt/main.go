@@ -14,7 +14,7 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-// AppConfig represents application configuration
+// AppConfig represents application configuration.
 type AppConfig struct {
 	Server struct {
 		Key        string `toml:"key"`         // Key is the serever key used to create tokens and validate API calls
@@ -39,7 +39,6 @@ type application struct {
 }
 
 func main() {
-
 	// Create loggers
 	infoLog := log.New(os.Stdout, "INFO\t", log.Ldate|log.Ltime)
 	errorLog := log.New(os.Stderr, "ERROR\t", log.Ldate|log.Ltime|log.Lshortfile)
@@ -63,6 +62,7 @@ func main() {
 		Before: func(c *cli.Context) error {
 			var err error
 			appcfg := new(AppConfig)
+
 			cfg := c.String("config")
 			if cfg == "" {
 				cfg, err = xdg.SearchConfigFile("goshrt/server.toml")
@@ -70,7 +70,7 @@ func main() {
 					return err
 				}
 			}
-			// a.infoLog.Printf("Using config file: %s\n", cfg)
+
 			if buf, err := os.ReadFile(cfg); err != nil {
 				return err
 			} else if err := toml.Unmarshal(buf, appcfg); err != nil {
@@ -115,7 +115,9 @@ func main() {
 						Usage: "validate jwt token",
 						Action: func(c *cli.Context) error {
 							auth := token.NewAuth(a.cfg.Server.Key)
-							if c.NArg() == 0 {
+
+							switch c.NArg() {
+							case 0:
 								fmt.Printf("JWT Token: ")
 								var toknStr string
 								fmt.Scanln(&toknStr)
@@ -128,7 +130,8 @@ func main() {
 								} else {
 									a.infoLog.Println("Token is NOT valid")
 								}
-							} else if c.NArg() == 1 {
+
+							case 1:
 								valid, err := auth.Validate(c.Args().First())
 								if err != nil {
 									return err
@@ -138,7 +141,8 @@ func main() {
 								} else {
 									a.infoLog.Println("Token is NOT valid")
 								}
-							} else {
+
+							default:
 								return errors.New("invalid number of arguments")
 							}
 							return nil
@@ -181,5 +185,4 @@ func main() {
 	if err != nil {
 		a.errorLog.Fatal(err)
 	}
-
 }

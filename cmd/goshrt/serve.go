@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"os"
 	"os/signal"
 	"syscall"
@@ -12,15 +13,18 @@ import (
 	"github.com/storvik/goshrt/token"
 )
 
-// Serve serves api in graceful manner
+// Serve serves api in graceful manner.
 func (a *application) Serve() error {
+	var err error
+
 	a.infoLog.Println("Starting goshrt server - self hosted url shortener")
 	s := http.NewServer(a.errorLog, a.cfg.Server.Port)
 
 	// Setup server and attach interfaces
 	auth := token.NewAuth(a.cfg.Server.Key)
 	db := postgres.NewClient(a.cfg.Database.DB, a.cfg.Database.User, a.cfg.Database.Password, a.cfg.Database.Address, a.cfg.Database.Schema)
-	err := db.Open()
+
+	err = db.Open()
 	if err != nil {
 		return err
 	}
@@ -34,6 +38,7 @@ func (a *application) Serve() error {
 
 	// Run database migrations
 	s.InfoLog.Println("Running database migrations")
+
 	err = db.Migrate()
 	if err != nil {
 		return err
@@ -45,34 +50,40 @@ func (a *application) Serve() error {
 	// Listen for syscall signals for process to interrupt/quit
 	sig := make(chan os.Signal, 1)
 	signal.Notify(sig, syscall.SIGHUP, syscall.SIGINT, syscall.SIGTERM, syscall.SIGQUIT)
+
 	go func() {
 		<-sig
 
 		// Shutdown signal with grace period of 30 seconds
-		shutdownCtx, _ := context.WithTimeout(serverCtx, 30*time.Second)
+		shutdownCtx, cancel := context.WithTimeout(serverCtx, 30*time.Second)
+		defer cancel()
 
 		go func() {
 			<-shutdownCtx.Done()
-			if shutdownCtx.Err() == context.DeadlineExceeded {
+
+			if errors.Is(shutdownCtx.Err(), context.DeadlineExceeded) {
 				a.errorLog.Fatal("graceful shutdown timed out.. forcing exit.")
 			}
 		}()
 
 		// Trigger graceful shutdown
-		err := s.Shutdown(shutdownCtx)
+		err = s.Shutdown(shutdownCtx)
 		if err != nil {
 			a.errorLog.Fatal(err)
 		}
+
 		err = s.ShrtStore.Close()
 		if err != nil {
 			a.errorLog.Fatal(err)
 		}
+
 		serverStopCtx()
 	}()
 
 	// Run the server
 	a.infoLog.Printf("Server started, running on port %s", a.cfg.Server.Port)
 	err = s.ListenAndServe()
+
 	if err != nil {
 		return err
 	}

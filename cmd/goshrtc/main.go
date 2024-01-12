@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"io/ioutil"
 	"os"
 	"time"
 
@@ -14,7 +13,7 @@ import (
 	"github.com/urfave/cli/v2"
 )
 
-// AppConfig represents application configuration
+// AppConfig represents application configuration.
 type AppConfig struct {
 	Client struct {
 		Key string `toml:"key"` // Key is the secret key used to authinticate with server
@@ -55,7 +54,7 @@ func main() {
 					return err
 				}
 			}
-			if buf, err := ioutil.ReadFile(cfg); err != nil {
+			if buf, err := os.ReadFile(cfg); err != nil {
 				return err
 			} else if err := toml.Unmarshal(buf, appcfg); err != nil {
 				return err
@@ -216,7 +215,6 @@ func main() {
 		fmt.Println(err)
 		os.Exit(1)
 	}
-
 }
 
 func printList(shrts []*goshrt.Shrt) {
@@ -225,6 +223,7 @@ func printList(shrts []*goshrt.Shrt) {
 		if i.Expiry.IsZero() {
 			t = "          "
 		}
+
 		fmt.Printf("%3d\t%s\t%-25s\t%-40s\t%s\n", i.ID, t, i.Domain, i.Slug, i.Dest)
 	}
 }

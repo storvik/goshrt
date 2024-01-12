@@ -7,9 +7,7 @@ import (
 )
 
 func TestShrt_Validation(t *testing.T) {
-
 	t.Run("Validate_Destination", func(t *testing.T) {
-
 		var tests = []struct {
 			s     goshrt.Shrt
 			valid bool
@@ -28,11 +26,9 @@ func TestShrt_Validation(t *testing.T) {
 			}
 		}
 	})
-
 }
 
 func TestShrt_ValidateSlug(t *testing.T) {
-
 	t.Run("OK", func(t *testing.T) {
 		var tests = []struct {
 			slug  string
@@ -40,6 +36,9 @@ func TestShrt_ValidateSlug(t *testing.T) {
 		}{
 			{"rRwfyu9", true},
 			{"api/rstrst", false},
+			{"public", false},
+			{"api", false},
+			{"public/hello", false},
 			{"apitrten", true},
 			{"239874str", true},
 			{"rst?strrts", false},

@@ -29,6 +29,7 @@ func MustOpenDB(tb testing.TB) goshrt.ShrtStorer {
 	if err := db.Open(); err != nil {
 		tb.Fatal(err)
 	}
+
 	if err := db.Migrate(); err != nil {
 		tb.Fatal(err)
 	}
@@ -39,6 +40,7 @@ func MustOpenDB(tb testing.TB) goshrt.ShrtStorer {
 // MustCloseDB closes the DB, fatal on error.
 func MustCloseDB(tb testing.TB, db goshrt.ShrtStorer) {
 	tb.Helper()
+
 	if err := db.Close(); err != nil {
 		tb.Fatal(err)
 	}

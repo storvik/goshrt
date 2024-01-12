@@ -1,6 +1,7 @@
 package postgres_test
 
 import (
+	"errors"
 	"testing"
 	"time"
 
@@ -8,7 +9,6 @@ import (
 )
 
 func TestShrtStorerPostgres_CreateShrt(t *testing.T) {
-
 	t.Run("OK", func(t *testing.T) {
 		db := MustOpenDB(t)
 		defer MustCloseDB(t, db)
@@ -44,10 +44,9 @@ func TestShrtStorerPostgres_CreateShrt(t *testing.T) {
 		if err == nil {
 			t.Fatal("expected error, but received none")
 		}
-		if err != goshrt.ErrMultiple {
+		if !errors.Is(err, goshrt.ErrMultiple) {
 			t.Error("expected multiple error, received another error")
 		}
-
 	})
 
 	t.Run("ErrInvalid", func(t *testing.T) {
@@ -77,16 +76,14 @@ func TestShrtStorerPostgres_CreateShrt(t *testing.T) {
 			if err == nil {
 				t.Fatal("expected error, but received none")
 			}
-			if err != goshrt.ErrInvalid {
+			if !errors.Is(err, goshrt.ErrInvalid) {
 				t.Error("expected invalid input error, received another error")
 			}
 		}
-
 	})
 }
 
 func TestShrtStorerPostgres_Shrt(t *testing.T) {
-
 	t.Run("OK", func(t *testing.T) {
 		db := MustOpenDB(t)
 		defer MustCloseDB(t, db)
@@ -109,13 +106,10 @@ func TestShrtStorerPostgres_Shrt(t *testing.T) {
 		if s1.Domain != s2.Domain || s1.Slug != s2.Slug || s1.Dest != s2.Dest {
 			t.Error("input not equal to output")
 		}
-
 	})
-
 }
 
 func TestShrtStorerPostgres_ShrtByID(t *testing.T) {
-
 	t.Run("OK", func(t *testing.T) {
 		db := MustOpenDB(t)
 		defer MustCloseDB(t, db)
@@ -140,13 +134,10 @@ func TestShrtStorerPostgres_ShrtByID(t *testing.T) {
 		if s1.Domain != s2.Domain || s1.Slug != s2.Slug || s1.Dest != s2.Dest {
 			t.Error("input not equal to output")
 		}
-
 	})
-
 }
 
 func TestShrtStorerPostgres_DeleteByID(t *testing.T) {
-
 	t.Run("OK", func(t *testing.T) {
 		db := MustOpenDB(t)
 		defer MustCloseDB(t, db)
@@ -172,16 +163,13 @@ func TestShrtStorerPostgres_DeleteByID(t *testing.T) {
 		}
 
 		_, err = db.ShrtByID(s1.ID)
-		if err != goshrt.ErrNotFound {
+		if !errors.Is(err, goshrt.ErrNotFound) {
 			t.Error("expected to not find deleted shrt, but found it")
 		}
-
 	})
-
 }
 
 func TestShrtStorerPostgres_Shrts(t *testing.T) {
-
 	t.Run("OK", func(t *testing.T) {
 		db := MustOpenDB(t)
 		defer MustCloseDB(t, db)
@@ -195,7 +183,6 @@ func TestShrtStorerPostgres_Shrts(t *testing.T) {
 }
 
 func TestShrtStorerPostgres_ShrtsByDomain(t *testing.T) {
-
 	t.Run("OK", func(t *testing.T) {
 		db := MustOpenDB(t)
 		defer MustCloseDB(t, db)

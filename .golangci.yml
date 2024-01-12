@@ -20,7 +20,6 @@ linters:
     - gocritic
     - gofmt
     - goimports
-    - gomnd
     - gocyclo
     - goprintffuncname
     - gosec
@@ -48,9 +47,12 @@ linters:
     - usestdlibvars
     - unparam
     - unused
-    - varnamelen
     - whitespace
     - wsl
+
+    # disabled
+    # - gomnd
+    # - varnamelen
 
 linters-settings:
   errcheck:
@@ -76,8 +78,6 @@ linters-settings:
         checks: argument,case,condition,return
   govet:
     check-shadowing: true
-    enable:
-      - fieldalignment
   nestif:
     min-complexity: 15
   nolintlint:
@@ -87,6 +87,8 @@ linters-settings:
     case:
       rules:
         json: snake
+  wsl:
+    allow-assign-and-anything: true
   varnamelen:
     max-distance: 10
     ignore-decls:

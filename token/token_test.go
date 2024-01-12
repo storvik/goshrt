@@ -21,6 +21,7 @@ func TestToken_Create(t *testing.T) {
 
 func TestToken_Validate(t *testing.T) {
 	a1 := token.NewAuth("qTGVn$a&hRJ9385C^z7L!MW5CnwZq3&$")
+
 	valid, err := a1.Create("testid")
 	if err != nil {
 		t.Fatal(err)
@@ -28,6 +29,7 @@ func TestToken_Validate(t *testing.T) {
 
 	// Slightly different from a1
 	a2 := token.NewAuth("qTGVn$a&hLJ9385C^z7L!MW5CnwZq&$")
+
 	invalid, err := a2.Create("testid")
 	if err != nil {
 		t.Fatal(err)

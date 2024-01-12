@@ -24,7 +24,7 @@ func (s *Server) authorize(next http.Handler) http.Handler {
 			response, _ := json.Marshal(map[string]string{"response": "forbidden, could not authenticate"})
 			w.Header().Set("Content-Type", "application/json; charset=utf-8")
 			w.WriteHeader(http.StatusForbidden)
-			w.Write(response)
+			s.logResWriterError(w.Write(response))
 			return
 		}
 		next.ServeHTTP(w, r)

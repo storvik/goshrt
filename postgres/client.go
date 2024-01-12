@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 
-	_ "github.com/lib/pq"
+	_ "github.com/lib/pq" // pq, postgres sql driver
 	"github.com/storvik/goshrt"
 )
 
@@ -32,12 +32,14 @@ func NewClient(n, u, p, a, s string) goshrt.ShrtStorer {
 
 // Open connects to database using info stored in client.
 func (c *client) Open() error {
-	connStr := fmt.Sprintf("postgresql://%s:%s@%s/%s?sslmode=disable&search_path=%s", c.user, c.password, c.address, c.name, c.schema)
 	var err error
+	connStr := fmt.Sprintf("postgresql://%s:%s@%s/%s?sslmode=disable&search_path=%s", c.user, c.password, c.address, c.name, c.schema)
+
 	c.db, err = sql.Open("postgres", connStr)
 	if err != nil {
 		return err
 	}
+
 	return nil
 }
 
@@ -58,5 +60,6 @@ func (c *client) Migrate() error {
    deleted bool default false
 );`
 	_, err := c.db.Exec(m)
+
 	return err
 }

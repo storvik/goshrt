@@ -20,7 +20,7 @@ type Shrt struct {
 	Expiry time.Time `json:"expire"`      // Timestamp for expire
 }
 
-// Printp pretty prints Shrt struct
+// Printp pretty prints Shrt struct.
 func (s *Shrt) Printp() {
 	var timestring string
 	if s.Expiry.IsZero() {
@@ -28,6 +28,7 @@ func (s *Shrt) Printp() {
 	} else {
 		timestring = s.Expiry.Format("2006.02.01")
 	}
+
 	fmt.Printf("ID\t\t%d\n", s.ID)
 	fmt.Printf("Domain\t\t%s\n", s.Domain)
 	fmt.Printf("Slug\t\t%s\n", s.Slug)
@@ -62,19 +63,23 @@ type ShrtStorer interface {
 	// TODO: Same as above with pagination
 }
 
-// GenerateSlug generates slug with length l
+// GenerateSlug generates slug with length l.
 func GenerateSlug(l uint64) string {
-	length := len(slugAlphabet)
 	var encodedBuilder strings.Builder
+
+	length := len(slugAlphabet)
+
 	encodedBuilder.Grow(10)
-	for ; l > 0; l = l / uint64(length) {
+
+	for ; l > 0; l /= uint64(length) {
 		encodedBuilder.WriteByte(slugAlphabet[(l % uint64(length))])
 	}
+
 	return encodedBuilder.String()
 }
 
-// ValidateSlug
+// ValidateSlug validates slug.
 func ValidateSlug(s string) bool {
-	r, _ := regexp.Compile("api/|\\?|#")
-	return !r.Match([]byte(s))
+	r := regexp.MustCompile(`public/|api/|\\?|#`)
+	return !r.MatchString(s)
 }
