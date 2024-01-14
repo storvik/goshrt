@@ -94,6 +94,7 @@ func NewServer(l *log.Logger, p string) *Server {
 				r.Delete("/", s.shrtDeleteHandler()) // DELETE      /shrt/{id}
 				r.Route("/{slug}", func(r chi.Router) {
 					r.Get("/", s.shrtGetHandler()) // GET           /shrt/{domain}/{slug}
+					// TODO: Add delete route with domain and slug
 				})
 			})
 		})
@@ -233,7 +234,6 @@ func (s *Server) shrtGetHandler() http.HandlerFunc {
 			s.ErrorLog.Printf("Could not get shrt from database: %s\n", err)
 			return
 		}
-
 		response, _ := json.Marshal(shrt)
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(http.StatusOK)
