@@ -1,6 +1,7 @@
 package http
 
 import (
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"testing"
@@ -25,10 +26,28 @@ func checkResponseCode(t *testing.T, expected, actual int) {
 	}
 }
 
+// compareShrts is a test helper that compares shrts.
+func compareShrts(t *testing.T, shrt, expected *goshrt.Shrt, includeID bool) {
+	t.Helper()
+
+	eq := (shrt.Dest == expected.Dest)
+	eq = eq && (shrt.Domain == expected.Domain)
+	eq = eq && (shrt.Slug == expected.Slug)
+
+	if includeID {
+		eq = eq && (shrt.ID == expected.ID)
+	}
+
+	if !eq {
+		t.Errorf("shrts not equal, expected %v, got %v", expected, shrt)
+	}
+}
+
 // mockStore used in tests. All functions that returns
 // one shrt will return shrt.
 type mockStore struct {
-	shrt *goshrt.Shrt
+	shrt  *goshrt.Shrt
+	shrts []*goshrt.Shrt
 }
 
 func (m *mockStore) Migrate() error {
@@ -43,13 +62,19 @@ func (m *mockStore) Close() error {
 	return nil
 }
 
-func (m *mockStore) CreateShrt(_ *goshrt.Shrt) error {
+func (m *mockStore) CreateShrt(s *goshrt.Shrt) error {
+	if m.shrt.Domain == "error" {
+		return goshrt.ErrInvalid
+	}
+
+	m.shrt = s
+
 	return nil
 }
 
 // Shrt gets shrt from domain and slug.
 func (m *mockStore) Shrt(d, s string) (*goshrt.Shrt, error) {
-	if d == m.shrt.Domain && s == m.shrt.Domain {
+	if d == m.shrt.Domain && s == m.shrt.Slug {
 		return m.shrt, nil
 	}
 
@@ -58,6 +83,11 @@ func (m *mockStore) Shrt(d, s string) (*goshrt.Shrt, error) {
 
 // ShrtByID gets shrt by ID.
 func (m *mockStore) ShrtByID(id int) (*goshrt.Shrt, error) {
+	// mock shrtstore not populated, used to test internal server error
+	if m.shrt == nil || m.shrt.ID == 0 {
+		return nil, errors.New("mock shrtstore not populated")
+	}
+
 	if id == m.shrt.ID {
 		return m.shrt, nil
 	}
@@ -67,6 +97,11 @@ func (m *mockStore) ShrtByID(id int) (*goshrt.Shrt, error) {
 
 // DeleteByID deletes shrt by ID and returns deleted shrt.
 func (m *mockStore) DeleteByID(id int) (*goshrt.Shrt, error) {
+	// mock shrtstore not populated, used to test internal server error
+	if m.shrt == nil || m.shrt.ID == 0 {
+		return nil, errors.New("mock shrtstore not populated")
+	}
+
 	if id == m.shrt.ID {
 		return m.shrt, nil
 	}
@@ -75,11 +110,26 @@ func (m *mockStore) DeleteByID(id int) (*goshrt.Shrt, error) {
 }
 
 func (m *mockStore) Shrts() ([]*goshrt.Shrt, error) {
-	return nil, nil
+	return m.shrts, nil
 }
 
-func (m *mockStore) ShrtsByDomain(_ string) ([]*goshrt.Shrt, error) {
-	return nil, nil
+func (m *mockStore) ShrtsByDomain(d string) ([]*goshrt.Shrt, error) {
+	if d == "error" {
+		return nil, errors.New("testerror")
+	}
+
+	shrts := []*goshrt.Shrt{}
+	for _, s := range m.shrts {
+		if s.Domain == d {
+			shrts = append(shrts, s)
+		}
+	}
+
+	if len(shrts) < 1 {
+		return nil, goshrt.ErrNotFound
+	}
+
+	return shrts, nil
 }
 
 type mockAuthorizer struct {

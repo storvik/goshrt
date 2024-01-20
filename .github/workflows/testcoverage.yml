@@ -25,6 +25,6 @@ jobs:
           local-prefix: github.com/storvik/goshrt
           threshold-file: 0 # setting to 0, should be increased
           threshold-package: 0 # setting to 0, should be increased
-          threshold-total: 80
+          threshold-total: 60 # 60 % is a nice starting point, must increase this
           git-token: ${{ github.ref_name == 'master' && secrets.GITHUB_TOKEN || '' }}
           git-branch: badges

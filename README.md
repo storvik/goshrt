@@ -188,8 +188,17 @@ Nix shell and `pgnix-` wrappers makes running unit test in a clean environment v
 Inside `nix develop` the following oneliner runs all unit tests:
 
 ``` shell
-$ pgnix-purge && pgnix-init && go clean -testcache && go test -v ./...
+$ pgnix-purge && pgnix-init && go clean -testcache && make test
 ```
 
 > `go clean -testcache` ensures that all tests are run.
 > Without it tests will be cached and for instance database migrations will not be run.
+
+#### Test coverage
+
+These commands are useful when working with test coverage in Go:
+
+``` shell
+$ go tool cover -func cover.out    // display test coverage in percentage
+$ go tool cover -html="cover.out"  // convert cover.out to html file with test coverage details
+```
