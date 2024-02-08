@@ -9,3 +9,12 @@ updates:
     directory: "/" # Location of package manifests
     schedule:
       interval: "daily"
+  - package-ecosystem: "github-actions" # See documentation for possible values
+    directory: "/" # Location of package manifests
+    schedule:
+      interval: "weekly"
+    groups:
+      # This is the name of your group, it will be used in PR titles and branch names
+      all-github-actions:
+        patterns:
+          - "*" # all "*"
