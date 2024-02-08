@@ -101,7 +101,7 @@ linters-settings:
       - op *Operation
 
 issues:
-  fix: true
+  fix: false
   exclude-rules:
     - path: _test\.go # disable some linters for test files
       linters:
