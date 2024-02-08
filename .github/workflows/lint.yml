@@ -1,6 +1,7 @@
 name: lint
 
-permissions: {}
+permissions:
+  contents: read
 
 on:
   push:
