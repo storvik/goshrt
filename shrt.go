@@ -66,7 +66,6 @@ type ShrtStorer interface {
 // GenerateSlug generates slug with length l.
 func GenerateSlug(l uint64) string {
 	var encodedBuilder strings.Builder
-
 	length := len(slugAlphabet)
 
 	encodedBuilder.Grow(10)
