@@ -23,9 +23,10 @@ jobs:
         uses: actions/setup-go@v5
         with:
           go-version-file: "go.mod"
+          cache: false
       - name: Lint
         uses: golangci/golangci-lint-action@v3.7.0
         with:
           version: latest
-          args: --timeout 15m
+          args: --timeout 15m -v
           install-mode: "goinstall"
