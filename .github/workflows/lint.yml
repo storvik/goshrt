@@ -1,7 +1,6 @@
 name: lint
 
-permissions:
-  contents: read
+permissions: {}
 
 on:
   push:
@@ -20,22 +19,13 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      - name: Install nix
-        uses: nixbuild/nix-quick-install-action@v26
+      - name: Install Go
+        uses: actions/setup-go@v5
         with:
-          nix_conf: experimental-features = nix-command flakes
+          go-version-file: "go.mod"
       - name: Lint
-        run: |
-          nix develop --command \
-            golangci-lint run -v
-      # - name: Install Go
-      #   uses: actions/setup-go@v5
-      #   with:
-      #     go-version-file: "go.mod"
-      #     cache: false
-      # - name: Lint
-      #   uses: golangci/golangci-lint-action@v3.7.0
-      #   with:
-      #     version: latest
-      #     args: --timeout 5m -v
-      #     install-mode: "goinstall"
+        uses: golangci/golangci-lint-action@v3.7.0
+        with:
+          version: latest
+          args: --timeout 15m
+          install-mode: "goinstall"
