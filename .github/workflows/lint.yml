@@ -24,7 +24,10 @@ jobs:
         uses: nixbuild/nix-quick-install-action@v26
         with:
           nix_conf: experimental-features = nix-command flakes
-      - name: Run govulncheck
+      - name: Lint
+        run: |
+          nix develop --command \
+            golangci-lint run -v
       # - name: Install Go
       #   uses: actions/setup-go@v5
       #   with:
@@ -36,7 +39,3 @@ jobs:
       #     version: latest
       #     args: --timeout 5m -v
       #     install-mode: "goinstall"
-      - name: Lint
-        run: |
-          nix develop --command \
-            golangci-lint run -v
