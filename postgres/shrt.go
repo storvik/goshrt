@@ -41,8 +41,8 @@ func (c *Client) ShrtByID(id int) (*goshrt.Shrt, error) {
 		ID: id,
 	}
 	t := sql.NullTime{}
-	err := c.db.QueryRow("SELECT domain, slug, dest, expiry FROM shrts WHERE deleted!=true AND id=$1", id).Scan(&shrt.Domain, &shrt.Slug, &shrt.Dest, &t)
 
+	err := c.db.QueryRow("SELECT domain, slug, dest, expiry FROM shrts WHERE deleted!=true AND id=$1", id).Scan(&shrt.Domain, &shrt.Slug, &shrt.Dest, &t)
 	if err == sql.ErrNoRows {
 		return nil, goshrt.ErrNotFound
 	}
@@ -64,8 +64,8 @@ func (c *Client) CreateShrt(s *goshrt.Shrt) error {
 	if s.Dest == "" || s.Domain == "" || s.Slug == "" {
 		return goshrt.ErrInvalid
 	}
-	rows, err := c.db.Query("SELECT expiry FROM shrts WHERE deleted!=true AND domain=$1 AND slug=$2", s.Domain, s.Slug)
 
+	rows, err := c.db.Query("SELECT expiry FROM shrts WHERE deleted!=true AND domain=$1 AND slug=$2", s.Domain, s.Slug)
 	if err != nil {
 		return err
 	}
@@ -93,6 +93,7 @@ func (c *Client) CreateShrt(s *goshrt.Shrt) error {
 	if err != nil {
 		return err
 	}
+
 	defer stmt.Close()
 
 	var id int
@@ -147,6 +148,7 @@ func (c *Client) Shrts() ([]*goshrt.Shrt, error) {
 	if err != nil {
 		return nil, err
 	}
+
 	defer rows.Close()
 
 	for rows.Next() {

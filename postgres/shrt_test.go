@@ -44,6 +44,7 @@ func TestShrtStorerPostgres_CreateShrt(t *testing.T) {
 		if err == nil {
 			t.Fatal("expected error, but received none")
 		}
+
 		if !errors.Is(err, goshrt.ErrMultiple) {
 			t.Error("expected multiple error, received another error")
 		}
@@ -76,6 +77,7 @@ func TestShrtStorerPostgres_CreateShrt(t *testing.T) {
 			if err == nil {
 				t.Fatal("expected error, but received none")
 			}
+
 			if !errors.Is(err, goshrt.ErrInvalid) {
 				t.Error("expected invalid input error, received another error")
 			}
@@ -140,6 +142,7 @@ func TestShrtStorerPostgres_ShrtByID(t *testing.T) {
 func TestShrtStorerPostgres_DeleteByID(t *testing.T) {
 	t.Run("OK", func(t *testing.T) {
 		db := MustOpenDB(t)
+
 		defer MustCloseDB(t, db)
 
 		s1 := &goshrt.Shrt{
@@ -174,11 +177,11 @@ func TestShrtStorerPostgres_Shrts(t *testing.T) {
 		db := MustOpenDB(t)
 		defer MustCloseDB(t, db)
 
+		// TODO: Find a better test case here
 		_, err := db.Shrts()
 		if err != nil {
 			t.Fatal(err)
 		}
-		// TODO: Find a better test case here
 	})
 }
 
@@ -221,6 +224,7 @@ func TestShrtStorerPostgres_ShrtsByDomain(t *testing.T) {
 		if err != nil {
 			t.Fatal(err)
 		}
+
 		if len(shrts) != len(tests) {
 			t.Errorf("expected %d items with given domain, got %d", len(tests), len(shrts))
 		}

@@ -93,8 +93,8 @@ func NewServer(l *log.Logger, p string) *Server {
 				r.Get("/", s.shrtGetHandler())       // GET         /shrt/{id}
 				r.Delete("/", s.shrtDeleteHandler()) // DELETE      /shrt/{id}
 				r.Route("/{slug}", func(r chi.Router) {
-					r.Get("/", s.shrtGetHandler()) // GET           /shrt/{domain}/{slug}
 					// TODO: Add delete route with domain and slug
+					r.Get("/", s.shrtGetHandler()) // GET           /shrt/{domain}/{slug}
 				})
 			})
 		})
@@ -136,11 +136,13 @@ func (s *Server) indexHandler() http.HandlerFunc {
 func (s *Server) shrtHandler() http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		t := time.Now()
+
 		slug := chi.URLParam(r, "*")
 		if slug == "" {
 			s.ErrorLog.Println("Could not get empty slug")
 			s.landingpage(w, landingInfo{Title: "Goshrt error", Message: "Slug is empty, that shouldn't happen!"})
 			w.WriteHeader(http.StatusNotFound)
+
 			return
 		}
 
@@ -150,13 +152,16 @@ func (s *Server) shrtHandler() http.HandlerFunc {
 			s.InfoLog.Println("Could not find, " + r.Host + "/" + slug)
 			s.landingpage(w, landingInfo{Title: "Goshrt error", Message: "Slug not found"})
 			w.WriteHeader(http.StatusNotFound)
+
 			return
 		} else if err != nil {
 			s.ErrorLog.Println("Could not get shrt, " + err.Error())
 			s.landingpage(w, landingInfo{Title: "Goshrt error", Message: "Something went wrong"})
 			w.WriteHeader(http.StatusInternalServerError)
+
 			return
 		}
+
 		s.InfoLog.Printf("%s %s used %s  --> %s\n", r.Method, r.URL, time.Since(t), shrt.Dest)
 		http.Redirect(w, r, shrt.Dest, http.StatusMovedPermanently)
 	})
@@ -166,10 +171,12 @@ func (s *Server) shrtCreateHandler() http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		shrt := new(goshrt.Shrt)
 		decoder := json.NewDecoder(r.Body)
+
 		err := decoder.Decode(&shrt)
 		if err != nil {
 			s.ErrorLog.Printf("Could not decode json: %s\n", err)
 			http.Error(w, err.Error(), http.StatusInternalServerError)
+
 			return
 		}
 
@@ -177,26 +184,31 @@ func (s *Server) shrtCreateHandler() http.HandlerFunc {
 		if shrt.Slug == "" {
 			shrt.Slug = goshrt.GenerateSlug(s.SlugLength)
 		}
+
 		if !shrt.ValidDest() || !goshrt.ValidateSlug(shrt.Slug) {
 			response, _ := json.Marshal(map[string]string{"response": "error storing shrt"})
+
 			w.Header().Set("Content-Type", "application/json; charset=utf-8")
 			w.WriteHeader(http.StatusBadRequest)
 			s.logResWriterError(w.Write(response))
 			s.ErrorLog.Printf("Invalid request, destination address or slug is not valid\n")
+
 			return
 		}
 
 		err = s.ShrtStore.CreateShrt(shrt)
 		if err != nil {
 			response, _ := json.Marshal(map[string]string{"response": "error storing shrt"})
+
 			w.Header().Set("Content-Type", "application/json; charset=utf-8")
 			w.WriteHeader(http.StatusInternalServerError)
 			s.logResWriterError(w.Write(response))
 			s.ErrorLog.Printf("Could not store shrt to database: %s\n", err)
+
 			return
 		}
-
 		response, _ := json.Marshal(shrt)
+
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(http.StatusCreated)
 		s.logResWriterError(w.Write(response))
@@ -206,6 +218,7 @@ func (s *Server) shrtCreateHandler() http.HandlerFunc {
 func (s *Server) shrtGetHandler() http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var err error
+
 		var shrt *goshrt.Shrt
 
 		// If slug is set, domain shold be present
@@ -221,20 +234,25 @@ func (s *Server) shrtGetHandler() http.HandlerFunc {
 
 		if errors.Is(err, goshrt.ErrNotFound) {
 			response, _ := json.Marshal(map[string]string{"response": "error retrieving"})
+
 			w.Header().Set("Content-Type", "application/json; charset=utf-8")
 			w.WriteHeader(http.StatusNotFound)
 			s.logResWriterError(w.Write(response))
 			s.ErrorLog.Printf("Could not get shrt from database: %s\n", err)
+
 			return
 		} else if err != nil {
 			response, _ := json.Marshal(map[string]string{"response": "error retrieving"})
+
 			w.Header().Set("Content-Type", "application/json; charset=utf-8")
 			w.WriteHeader(http.StatusInternalServerError)
 			s.logResWriterError(w.Write(response))
 			s.ErrorLog.Printf("Could not get shrt from database: %s\n", err)
+
 			return
 		}
 		response, _ := json.Marshal(shrt)
+
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(http.StatusOK)
 		s.logResWriterError(w.Write(response))
@@ -245,24 +263,30 @@ func (s *Server) shrtDeleteHandler() http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		id := chi.URLParam(r, "id_domain")
 		idInt, _ := strconv.Atoi(id)
+
 		shrt, err := s.ShrtStore.DeleteByID(idInt)
 		if errors.Is(err, goshrt.ErrNotFound) {
 			response, _ := json.Marshal(map[string]string{"response": "could not find item with given id"})
+
 			w.Header().Set("Content-Type", "application/json; charset=utf-8")
 			w.WriteHeader(http.StatusNotFound)
 			s.logResWriterError(w.Write(response))
 			s.ErrorLog.Printf("Could not find and delete shrt with id %d, %s\n", idInt, err)
+
 			return
 		} else if err != nil {
 			response, _ := json.Marshal(map[string]string{"response": "error retrieving"})
+
 			w.Header().Set("Content-Type", "application/json; charset=utf-8")
 			w.WriteHeader(http.StatusInternalServerError)
 			s.logResWriterError(w.Write(response))
 			s.ErrorLog.Printf("Could not get shrt from database: %s\n", err)
+
 			return
 		}
 
 		response, _ := json.Marshal(shrt)
+
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(http.StatusOK)
 		s.logResWriterError(w.Write(response))
@@ -272,6 +296,7 @@ func (s *Server) shrtDeleteHandler() http.HandlerFunc {
 func (s *Server) shrtListHandler() http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var err error
+
 		var shrts []*goshrt.Shrt
 
 		domain := chi.URLParam(r, "domain")
@@ -283,21 +308,26 @@ func (s *Server) shrtListHandler() http.HandlerFunc {
 
 		if errors.Is(err, goshrt.ErrNotFound) {
 			response, _ := json.Marshal(map[string]string{"response": "error retrieving"})
+
 			w.Header().Set("Content-Type", "application/json; charset=utf-8")
 			w.WriteHeader(http.StatusNotFound)
 			s.logResWriterError(w.Write(response))
 			s.ErrorLog.Printf("Could not get shrts from database: %s\n", err)
+
 			return
 		} else if err != nil {
 			response, _ := json.Marshal(map[string]string{"response": "error retrieving"})
+
 			w.Header().Set("Content-Type", "application/json; charset=utf-8")
 			w.WriteHeader(http.StatusInternalServerError)
 			s.logResWriterError(w.Write(response))
 			s.ErrorLog.Printf("Could not get shrts from database: %s\n", err)
+
 			return
 		}
 
 		response, _ := json.Marshal(shrts)
+
 		w.Header().Set("Content-Type", "application/json; charset=utf-8")
 		w.WriteHeader(http.StatusOK)
 		s.logResWriterError(w.Write(response))
