@@ -20,14 +20,23 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      - name: Install Go
-        uses: actions/setup-go@v5
+      - name: Install nix
+        uses: nixbuild/nix-quick-install-action@v26
         with:
-          go-version-file: "go.mod"
-          cache: false
+          nix_conf: experimental-features = nix-command flakes
+      - name: Run govulncheck
+      # - name: Install Go
+      #   uses: actions/setup-go@v5
+      #   with:
+      #     go-version-file: "go.mod"
+      #     cache: false
+      # - name: Lint
+      #   uses: golangci/golangci-lint-action@v3.7.0
+      #   with:
+      #     version: latest
+      #     args: --timeout 5m -v
+      #     install-mode: "goinstall"
       - name: Lint
-        uses: golangci/golangci-lint-action@v3.7.0
-        with:
-          version: latest
-          args: --timeout 5m -v
-          install-mode: "goinstall"
+        run: |
+          nix develop --command \
+            golangci-lint run -v
