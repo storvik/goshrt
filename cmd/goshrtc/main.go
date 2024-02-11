@@ -67,7 +67,7 @@ func main() {
 				Name:    "version",
 				Aliases: []string{"v"},
 				Usage:   "print version",
-				Action: func(c *cli.Context) error {
+				Action: func(_ *cli.Context) error {
 					version.Print()
 					return nil
 				},

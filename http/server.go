@@ -16,8 +16,6 @@ import (
 	"github.com/storvik/goshrt/assets"
 )
 
-// TODO: Add tests using httptest
-
 // Server type, must be global in order to addach interfaces used
 // in http routes.
 type Server struct {
@@ -70,7 +68,7 @@ func NewServer(l *log.Logger, p string) *Server {
 	r.Get("/*", s.shrtHandler())
 
 	// Not found handler
-	r.NotFound(func(w http.ResponseWriter, r *http.Request) {
+	r.NotFound(func(w http.ResponseWriter, _ *http.Request) {
 		s.landingpage(w, landingInfo{Title: "404", Message: "Content not found"})
 		w.WriteHeader(http.StatusNotFound)
 	})
@@ -123,7 +121,7 @@ func (s *Server) Shutdown(ctx context.Context) error {
 }
 
 func (s *Server) indexHandler() http.HandlerFunc {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+	return http.HandlerFunc(func(w http.ResponseWriter, _ *http.Request) {
 		w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
 		err := s.tmpl.Execute(w, landingInfo{Title: "Goshrt", Message: "Self hosted URL shortener written in Go!"})

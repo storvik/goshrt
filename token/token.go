@@ -55,7 +55,7 @@ func (a *Auth) Create(id string) (string, error) {
 func (a *Auth) Validate(t string) (bool, error) {
 	c := &claims{}
 
-	token, err := jwt.ParseWithClaims(t, c, func(token *jwt.Token) (interface{}, error) {
+	token, err := jwt.ParseWithClaims(t, c, func(_ *jwt.Token) (interface{}, error) {
 		return []byte(a.token), nil
 	})
 	if err != nil {

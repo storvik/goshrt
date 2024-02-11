@@ -84,7 +84,7 @@ func main() {
 				Name:    "version",
 				Aliases: []string{"v"},
 				Usage:   "print version",
-				Action: func(c *cli.Context) error {
+				Action: func(_ *cli.Context) error {
 					version.Print()
 					return nil
 				},
@@ -158,7 +158,7 @@ func main() {
 					{
 						Name:  "migrate",
 						Usage: "migrate database, no other instance of goshrt must be running",
-						Action: func(c *cli.Context) error {
+						Action: func(_ *cli.Context) error {
 							db := postgres.NewClient(a.cfg.Database.DB, a.cfg.Database.User, a.cfg.Database.Password, a.cfg.Database.Address, a.cfg.Database.Schema)
 							if err := db.Open(); err != nil {
 								return err
@@ -175,7 +175,7 @@ func main() {
 				},
 			},
 		},
-		Action: func(c *cli.Context) error {
+		Action: func(_ *cli.Context) error {
 			return a.Serve()
 		},
 	}
