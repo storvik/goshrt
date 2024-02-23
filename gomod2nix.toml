@@ -11,8 +11,8 @@ schema = 3
     version = "v1.1.1"
     hash = "sha256-nhzSUrE1fCkN0+RL04N4h8jWmRFPPPWbCuDc7Ss0akI="
   [mod."github.com/go-chi/chi/v5"]
-    version = "v5.0.11"
-    hash = "sha256-95LKg/OVzhik2HUz6cirHH3eAT4qbHSg52bSvkc+XOY="
+    version = "v5.0.12"
+    hash = "sha256-PhCb3wVSzuIXxZxM7aB3MdMLK3nnvUMhaMXk+p+H6Ec="
   [mod."github.com/golang-jwt/jwt/v4"]
     version = "v4.5.0"
     hash = "sha256-dyKL8wQRApkdCkKxJ1knllvixsrBLw+BtRS0SjlN7NQ="
