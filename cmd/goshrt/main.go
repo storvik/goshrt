@@ -76,6 +76,11 @@ func main() {
 			} else if err := toml.Unmarshal(buf, appcfg); err != nil {
 				return err
 			}
+
+			if appcfg.Database.Schema == "" {
+				appcfg.Database.Schema = "public"
+			}
+
 			a.cfg = appcfg
 			return nil
 		},

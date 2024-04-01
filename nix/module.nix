@@ -23,6 +23,7 @@ let
     user = "${cfg.database.user}"
     password = "${cfg.database.password}"
     address = "${cfg.database.host}:${(toString cfg.database.port)}"
+    schema = "${cfg.database.schema}"
   '';
   forEachHost = genAttrs cfg.nginx.hostnames;
   virtualHostsConfig = forEachHost
@@ -121,7 +122,11 @@ in
         default = "goshrt";
         description = lib.mdDoc "Database user.";
       };
-
+      schema = mkOption {
+        type = types.str;
+        default = "public";
+        description = lib.mdDoc "Database schema.";
+      };
       # TODO: Implement passwordFile as an alternative
       password = mkOption {
         type = types.str;
