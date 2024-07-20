@@ -125,7 +125,10 @@ func main() {
 							case 0:
 								fmt.Printf("JWT Token: ")
 								var toknStr string
-								fmt.Scanln(&toknStr)
+								_, err := fmt.Scanln(&toknStr)
+								if err != nil {
+									return err
+								}
 								valid, err := auth.Validate(toknStr)
 								if err != nil {
 									return err
