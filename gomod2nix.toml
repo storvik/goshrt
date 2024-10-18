@@ -2,11 +2,11 @@ schema = 3
 
 [mod]
   [mod."github.com/adrg/xdg"]
-    version = "v0.5.0"
-    hash = "sha256-hYxtRzeFzT+4zbslWSZWmUJf+OBDmCiwL0D/0Ry8Z2I="
+    version = "v0.5.1"
+    hash = "sha256-Jjl0HQX+BXtQgPe4vAeyfhakjn3zxPWI8IdwXP5dJ9s="
   [mod."github.com/cpuguy83/go-md2man/v2"]
-    version = "v2.0.4"
-    hash = "sha256-pQ+H8Psh92KWTang8hK0cHFLomH+4X0rMMilIJUQ4Qc="
+    version = "v2.0.5"
+    hash = "sha256-UX9FajFqZApVFED3MYcq167iPwztnIck25ehfcOeFD8="
   [mod."github.com/go-chi/chi/v5"]
     version = "v5.1.0"
     hash = "sha256-DpVfbPlJe4zQNdBrirWq9Q37/awSu5zb3IJgcuyEED8="
@@ -23,11 +23,11 @@ schema = 3
     version = "v2.1.0"
     hash = "sha256-R+84l1si8az5yDqd5CYcFrTyNZ1eSYlpXKq6nFt4OTQ="
   [mod."github.com/urfave/cli/v2"]
-    version = "v2.27.2"
-    hash = "sha256-P0yLmx2a2hIQjQ/RXKLG8ehI5eVivnettuMFr8MznFY="
+    version = "v2.27.5"
+    hash = "sha256-b/mERhhQ7CHxVEyf2QXfVnZut9pgMMVgL4zs2Wh9s4A="
   [mod."github.com/xrash/smetrics"]
-    version = "v0.0.0-20240312152122-5f08fbb34913"
-    hash = "sha256-ySUTdeoOUi3QcLEJBYvCDIhVrsrD2Ks6/4V9n4hCvBk="
+    version = "v0.0.0-20240521201337-686a1a2994c1"
+    hash = "sha256-CsyN59w6sKERDI5kkdpq0YKmqdixyCHuN4FYE/56/BQ="
   [mod."golang.org/x/sys"]
-    version = "v0.22.0"
-    hash = "sha256-RbG0XaXGGlErCsl2agvUxMnrkRwdbJLmriYT1H24FwA="
+    version = "v0.26.0"
+    hash = "sha256-YjklsWNhx4g4TaWRWfFe1TMFKujbqiaNvZ38bfI35fM="
