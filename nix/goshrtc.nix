@@ -2,18 +2,17 @@
 , callPackage
 , go
 , lib
-, buildGoApplication
+, buildGoModule
 , version
 }:
 
-buildGoApplication rec {
-  inherit version;
+buildGoModule {
   pname = "goshrtc";
-  pwd = ./..;
+  inherit version;
   src = ./..;
+  # modRoot = ./..;
   subPackages = [ "cmd/goshrtc" ];
-  modules = ./../gomod2nix.toml;
-  # ldflags = "-w -s -X 'github.com/storvik/goshrt/version.GitVersion=${version}'";
+  vendorHash = "sha256-63ube2xpfqkfCbiAO79BgIEH6JgVkmnAg4HUURsZjLI=";
   doCheck = false;
 
   meta = {

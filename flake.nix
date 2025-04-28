@@ -2,17 +2,10 @@
   description = "Goshrt flake file";
 
   inputs = {
-
     nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
-
-    gomod2nix = {
-      url = "github:tweag/gomod2nix";
-      inputs.nixpkgs.follows = "nixpkgs";
-    };
-
   };
 
-  outputs = inputs@{ self, nixpkgs, gomod2nix }:
+  outputs = inputs@{ self, nixpkgs }:
     let
       linuxSystems = [ "x86_64-linux" "aarch64-linux" ];
       darwinSystems = [ "aarch64-darwin" "x86_64-darwin" ];
@@ -21,9 +14,7 @@
           (system:
             function (import nixpkgs {
               inherit system;
-              overlays = [
-                gomod2nix.overlays.default
-              ];
+              overlays = [ ];
               config = { };
             }));
       version = "0.3.0";
