@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Install nix
         uses: nixbuild/nix-quick-install-action@v32
         with:
@@ -19,7 +19,7 @@ jobs:
           nix develop --command \
             gomod2nix generate
       - name: Update flake.lock
-        uses: DeterminateSystems/update-flake-lock@v25
+        uses: DeterminateSystems/update-flake-lock@v27
         with:
           token: ${{ secrets.GH_TOKEN_FOR_FLAKE_UPDATE }}
           pr-title: "Update flake.lock" 
