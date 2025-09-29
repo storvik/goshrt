@@ -11,7 +11,7 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v5
       - name: Install nix
-        uses: nixbuild/nix-quick-install-action@v33
+        uses: nixbuild/nix-quick-install-action@v34
         with:
           nix_conf: experimental-features = nix-command flakes
       - name: Run gomod2nix generate
