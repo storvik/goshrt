@@ -6,7 +6,7 @@ require (
 	github.com/adrg/xdg v0.5.3
 	github.com/go-chi/chi/v5 v5.2.5
 	github.com/golang-jwt/jwt/v4 v4.5.2
-	github.com/lib/pq v1.10.9
+	github.com/lib/pq v1.11.2
 	github.com/pelletier/go-toml v1.9.5
 	github.com/urfave/cli/v2 v2.27.7
 )
